@@ -8,6 +8,7 @@ import ArticlePage from "./pages/ArticlePage";
 import BookmarksPage from "./pages/BookmarksPage";
 import NotesPage from "./pages/NotesPage";
 import NotFound from "./pages/NotFound";
+import MobileFAB from "./components/MobileFAB";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/notes" element={<NotesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <MobileFAB />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
