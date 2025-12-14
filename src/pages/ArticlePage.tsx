@@ -24,6 +24,7 @@ import ImageLightbox from '@/components/ImageLightbox';
 import TableOfContents from '@/components/TableOfContents';
 import TextSelectionTooltip from '@/components/TextSelectionTooltip';
 import HighlightsPanel from '@/components/HighlightsPanel';
+import ArticleBreadcrumbs from '@/components/ArticleBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -58,7 +59,8 @@ export default function ArticlePage() {
     addNote,
     addHighlight,
     removeHighlight,
-    highlights
+    highlights,
+    addBreadcrumb
   } = useStore();
 
   const bookmarked = article ? isBookmarked(article.pageid) : false;
@@ -92,6 +94,11 @@ export default function ArticlePage() {
             extract: articleData.extract,
             content: '',
             thumbnail: articleData.thumbnail?.source,
+          });
+          // Add to breadcrumb trail
+          addBreadcrumb({
+            title: articleData.title,
+            path: `/article/${encodeURIComponent(articleData.title)}`,
           });
         }
 
@@ -329,6 +336,9 @@ export default function ArticlePage() {
 
   const ArticleContent = () => (
     <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
+      {/* Breadcrumb navigation */}
+      {!isStudyMode && <ArticleBreadcrumbs />}
+      
       {/* Back button and actions */}
       <div className="flex items-center justify-between mb-8">
         <Button
