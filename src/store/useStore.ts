@@ -29,6 +29,11 @@ export interface ArticleState {
   thumbnail?: string;
 }
 
+interface BreadcrumbItem {
+  title: string;
+  path: string;
+}
+
 interface StoreState {
   // Search
   searchQuery: string;
@@ -69,6 +74,12 @@ interface StoreState {
   addBookmark: (article: ArticleState) => void;
   removeBookmark: (pageid: number) => void;
   isBookmarked: (pageid: number) => boolean;
+
+  // Breadcrumb navigation
+  breadcrumbs: BreadcrumbItem[];
+  addBreadcrumb: (item: BreadcrumbItem) => void;
+  navigateToBreadcrumb: (index: number) => BreadcrumbItem[];
+  clearBreadcrumbs: () => void;
 }
 
 export const useStore = create<StoreState>()(
@@ -162,6 +173,26 @@ export const useStore = create<StoreState>()(
           bookmarks: state.bookmarks.filter((b) => b.pageid !== pageid),
         })),
       isBookmarked: (pageid) => get().bookmarks.some((b) => b.pageid === pageid),
+
+      // Breadcrumb navigation
+      breadcrumbs: [],
+      addBreadcrumb: (item) =>
+        set((state) => {
+          // Don't add duplicate consecutive breadcrumbs
+          const last = state.breadcrumbs[state.breadcrumbs.length - 1];
+          if (last?.path === item.path) return state;
+          // Keep max 10 breadcrumbs
+          return {
+            breadcrumbs: [...state.breadcrumbs, item].slice(-10),
+          };
+        }),
+      navigateToBreadcrumb: (index) => {
+        const state = get();
+        const newBreadcrumbs = state.breadcrumbs.slice(0, index + 1);
+        set({ breadcrumbs: newBreadcrumbs });
+        return newBreadcrumbs;
+      },
+      clearBreadcrumbs: () => set({ breadcrumbs: [] }),
     }),
     {
       name: 'knooq-knowledge-store',
