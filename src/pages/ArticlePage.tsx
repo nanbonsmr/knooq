@@ -19,6 +19,7 @@ import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
 import StudyWorkspace from '@/components/StudyWorkspace';
 import ImageLightbox from '@/components/ImageLightbox';
+import TableOfContents from '@/components/TableOfContents';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -40,6 +41,7 @@ export default function ArticlePage() {
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const articleContentRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { 
     addRecentArticle, 
@@ -99,21 +101,23 @@ export default function ArticlePage() {
     fetchArticle();
   }, [title, addRecentArticle]);
 
+  // Track scroll progress
   useEffect(() => {
     const handleScroll = () => {
-      if (contentRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+      const container = scrollContainerRef.current;
+      if (container) {
+        const { scrollTop, scrollHeight, clientHeight } = container;
         const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
-        setReadProgress(Math.min(progress, 100));
+        setReadProgress(Math.min(Math.max(progress, 0), 100));
       }
     };
 
-    const content = contentRef.current;
-    if (content) {
-      content.addEventListener('scroll', handleScroll);
-      return () => content.removeEventListener('scroll', handleScroll);
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, []);
+  }, [htmlContent]);
 
   const handleBookmark = () => {
     if (!article) return;
@@ -339,15 +343,18 @@ export default function ArticlePage() {
 
           {/* Full Article Content */}
           {htmlContent && (
-            <ScrollArea ref={contentRef} className={isStudyMode ? 'h-[calc(100vh-400px)]' : 'max-h-[70vh]'}>
+            <div 
+              ref={scrollContainerRef}
+              className={`overflow-y-auto scroll-smooth ${isStudyMode ? 'h-[calc(100vh-400px)]' : 'h-[70vh]'}`}
+            >
               <div
                 ref={articleContentRef}
-                className="wiki-content prose prose-invert prose-lg max-w-none select-text"
+                className="wiki-content prose prose-invert prose-lg max-w-none select-text pr-4"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
                 draggable={isStudyMode}
                 onDragStart={handleDragStart}
               />
-            </ScrollArea>
+            </div>
           )}
         </motion.article>
       ) : (
@@ -403,6 +410,13 @@ export default function ArticlePage() {
       ) : (
         /* Normal Mode */
         <main className={`relative z-10 transition-all duration-300 ${isNotePanelOpen ? 'mr-[400px]' : ''}`}>
+          {/* Table of Contents - only show in normal mode with content */}
+          {!isLoading && htmlContent && (
+            <TableOfContents 
+              contentRef={scrollContainerRef} 
+              htmlContent={htmlContent} 
+            />
+          )}
           <ArticleContent />
         </main>
       )}
