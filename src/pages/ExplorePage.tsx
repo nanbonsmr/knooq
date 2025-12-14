@@ -97,7 +97,7 @@ export default function ExplorePage() {
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="text-foreground">Welcome to </span>
-            <span className="gradient-text text-glow">Nexus</span>
+            <span className="gradient-text text-glow">knooq</span>
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">

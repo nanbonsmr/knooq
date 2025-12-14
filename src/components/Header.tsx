@@ -33,10 +33,10 @@ export default function Header() {
                   transition={{ duration: 0.7 }}
                   className="w-10 h-10"
                 >
-                  <img src={logo} alt="Nexus Logo" className="w-full h-full object-contain" />
+                  <img src={logo} alt="knooq Logo" className="w-full h-full object-contain" />
                 </motion.div>
                 <div>
-                  <h1 className="text-xl font-bold gradient-text">Nexus</h1>
+                  <h1 className="text-xl font-bold gradient-text">knooq</h1>
                   <p className="text-xs text-muted-foreground -mt-1">Knowledge Platform</p>
                 </div>
               </Link>
@@ -97,8 +97,8 @@ export default function Header() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border/30">
                   <div className="flex items-center gap-3">
-                    <img src={logo} alt="Nexus Logo" className="w-8 h-8 object-contain" />
-                    <span className="font-bold gradient-text">Nexus</span>
+                    <img src={logo} alt="knooq Logo" className="w-8 h-8 object-contain" />
+                    <span className="font-bold gradient-text">knooq</span>
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}

@@ -44,7 +44,7 @@ export default function NotesPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'nexus-notes.md';
+    a.download = 'knooq-notes.md';
     a.click();
     URL.revokeObjectURL(url);
   };

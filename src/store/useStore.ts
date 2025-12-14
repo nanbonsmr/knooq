@@ -130,7 +130,7 @@ export const useStore = create<StoreState>()(
       isBookmarked: (pageid) => get().bookmarks.some((b) => b.pageid === pageid),
     }),
     {
-      name: 'nexus-knowledge-store',
+      name: 'knooq-knowledge-store',
       partialize: (state) => ({
         notes: state.notes,
         recentArticles: state.recentArticles,
