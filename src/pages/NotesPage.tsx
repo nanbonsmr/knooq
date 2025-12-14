@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { StickyNote, Search, Trash2, Tag, FileText, Download, Eye, Highlighter, ChevronDown, Quote } from 'lucide-react';
+import { StickyNote, Search, Trash2, Tag, FileText, Download, Eye, Highlighter, ChevronDown, Quote, FileDown } from 'lucide-react';
 import Header from '@/components/Header';
 import NoteDetailModal from '@/components/NoteDetailModal';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,21 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import { useStore, Note } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { exportToMarkdown, exportNotesOnly, exportHighlightsOnly, downloadMarkdown } from '@/lib/export';
+import { 
+  exportToMarkdown, 
+  exportNotesOnly, 
+  exportHighlightsOnly, 
+  downloadMarkdown,
+  exportToPDF,
+  exportNotesToPDF,
+  exportHighlightsToPDF
+} from '@/lib/export';
 import { toast } from '@/hooks/use-toast';
 
 export default function NotesPage() {
@@ -48,22 +59,39 @@ export default function NotesPage() {
     return acc;
   }, {} as Record<string, typeof notes>);
 
-  const handleExportAll = () => {
+  // Markdown exports
+  const handleExportAllMd = () => {
     const markdown = exportToMarkdown(notes, highlights);
     downloadMarkdown(markdown, 'knooq-export.md');
-    toast({ title: 'Exported successfully', description: `${notes.length} notes and ${highlights.length} highlights` });
+    toast({ title: 'Exported as Markdown', description: `${notes.length} notes and ${highlights.length} highlights` });
   };
 
-  const handleExportNotes = () => {
+  const handleExportNotesMd = () => {
     const markdown = exportNotesOnly(notes);
     downloadMarkdown(markdown, 'knooq-notes.md');
-    toast({ title: 'Notes exported', description: `${notes.length} notes` });
+    toast({ title: 'Notes exported as Markdown' });
   };
 
-  const handleExportHighlights = () => {
+  const handleExportHighlightsMd = () => {
     const markdown = exportHighlightsOnly(highlights);
     downloadMarkdown(markdown, 'knooq-highlights.md');
-    toast({ title: 'Highlights exported', description: `${highlights.length} highlights` });
+    toast({ title: 'Highlights exported as Markdown' });
+  };
+
+  // PDF exports
+  const handleExportAllPdf = () => {
+    exportToPDF(notes, highlights, 'knooq-export.pdf');
+    toast({ title: 'Exported as PDF', description: `${notes.length} notes and ${highlights.length} highlights` });
+  };
+
+  const handleExportNotesPdf = () => {
+    exportNotesToPDF(notes);
+    toast({ title: 'Notes exported as PDF' });
+  };
+
+  const handleExportHighlightsPdf = () => {
+    exportHighlightsToPDF(highlights);
+    toast({ title: 'Highlights exported as PDF' });
   };
 
   const handleViewNote = (note: Note) => {
@@ -108,20 +136,41 @@ export default function NotesPage() {
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleExportAll} className="gap-2">
-                    <FileText className="w-4 h-4" />
-                    Export All
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleExportNotes} className="gap-2" disabled={notes.length === 0}>
-                    <StickyNote className="w-4 h-4" />
-                    Notes Only ({notes.length})
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportHighlights} className="gap-2" disabled={highlights.length === 0}>
-                    <Highlighter className="w-4 h-4" />
-                    Highlights Only ({highlights.length})
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="gap-2">
+                      <FileText className="w-4 h-4" />
+                      Export as Markdown
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={handleExportAllMd} className="gap-2">
+                        Export All
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleExportNotesMd} className="gap-2" disabled={notes.length === 0}>
+                        Notes Only ({notes.length})
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleExportHighlightsMd} className="gap-2" disabled={highlights.length === 0}>
+                        Highlights Only ({highlights.length})
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="gap-2">
+                      <FileDown className="w-4 h-4" />
+                      Export as PDF
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={handleExportAllPdf} className="gap-2">
+                        Export All
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleExportNotesPdf} className="gap-2" disabled={notes.length === 0}>
+                        Notes Only ({notes.length})
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleExportHighlightsPdf} className="gap-2" disabled={highlights.length === 0}>
+                        Highlights Only ({highlights.length})
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}

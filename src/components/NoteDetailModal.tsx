@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit2, Trash2, Tag, Quote, Calendar, FileText, Save } from 'lucide-react';
+import { X, Edit2, Trash2, Tag, Quote, Calendar, FileText, Save, Download, FileDown } from 'lucide-react';
 import { Note, useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useNavigate } from 'react-router-dom';
+import { exportSingleNote, downloadMarkdown, exportSingleNoteToPDF } from '@/lib/export';
+import { toast } from '@/hooks/use-toast';
 
 interface NoteDetailModalProps {
   note: Note | null;
@@ -99,6 +107,42 @@ export default function NoteDetailModal({ note, isOpen, onClose }: NoteDetailMod
               <div className="flex items-center gap-2">
                 {!isEditing && (
                   <>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full"
+                          title="Export note"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            const markdown = exportSingleNote(note);
+                            const safeTitle = note.articleTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                            downloadMarkdown(markdown, `note-${safeTitle}.md`);
+                            toast({ title: 'Note exported as Markdown' });
+                          }} 
+                          className="gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Export as Markdown
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            exportSingleNoteToPDF(note);
+                            toast({ title: 'Note exported as PDF' });
+                          }} 
+                          className="gap-2"
+                        >
+                          <FileDown className="w-4 h-4" />
+                          Export as PDF
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button
                       variant="ghost"
                       size="icon"
