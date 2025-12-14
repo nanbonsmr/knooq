@@ -371,8 +371,13 @@ export default function ExplorePage() {
                     <p className="text-sm text-muted-foreground">What the world is reading</p>
                   </div>
                 </div>
-                <Button variant="ghost" className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-                  View all
+                <Button 
+                  variant="ghost" 
+                  className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setVisibleTrending(trendingArticles.length)}
+                  disabled={visibleTrending >= trendingArticles.length}
+                >
+                  {visibleTrending >= trendingArticles.length ? 'Showing all' : 'View all'}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </motion.div>
