@@ -224,3 +224,58 @@ export async function getTrendingArticles(): Promise<WikiSearchResult[]> {
     return [];
   }
 }
+
+export async function getRelatedArticles(title: string): Promise<WikiSearchResult[]> {
+  const params = new URLSearchParams({
+    action: 'query',
+    titles: title,
+    prop: 'links',
+    pllimit: '20',
+    plnamespace: '0',
+    format: 'json',
+    origin: '*',
+  });
+
+  try {
+    const response = await fetch(`${WIKI_ACTION_API}?${params}`);
+    const data = await response.json();
+
+    const pages = Object.values(data.query?.pages || {}) as any[];
+    const links = pages[0]?.links?.slice(0, 8) || [];
+    
+    if (links.length === 0) return [];
+
+    const titles = links.map((l: any) => l.title).join('|');
+    
+    const detailParams = new URLSearchParams({
+      action: 'query',
+      titles: titles,
+      prop: 'pageimages|extracts|description',
+      exintro: '1',
+      explaintext: '1',
+      exlimit: '8',
+      pithumbsize: '200',
+      format: 'json',
+      origin: '*',
+    });
+
+    const detailResponse = await fetch(`${WIKI_ACTION_API}?${detailParams}`);
+    const detailData = await detailResponse.json();
+
+    const detailPages = Object.values(detailData.query?.pages || {}) as any[];
+
+    return detailPages
+      .filter((page) => page.pageid && page.pageid > 0)
+      .slice(0, 8)
+      .map((page) => ({
+        pageid: page.pageid,
+        title: page.title,
+        extract: page.extract?.slice(0, 100),
+        thumbnail: page.thumbnail,
+        description: page.description,
+      }));
+  } catch (error) {
+    console.error('Failed to fetch related articles:', error);
+    return [];
+  }
+}
