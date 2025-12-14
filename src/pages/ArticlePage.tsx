@@ -52,7 +52,9 @@ export default function ArticlePage() {
     isNotePanelOpen,
     isStudyMode,
     setStudyMode,
-    addNote
+    addNote,
+    addHighlight,
+    highlights
   } = useStore();
 
   const bookmarked = article ? isBookmarked(article.pageid) : false;
@@ -120,6 +122,26 @@ export default function ArticlePage() {
     }
   }, [htmlContent]);
 
+  // Apply highlights to content
+  const articleHighlights = article 
+    ? highlights.filter(h => h.articleId === String(article.pageid))
+    : [];
+
+  const highlightedContent = useCallback(() => {
+    if (!htmlContent || articleHighlights.length === 0) return htmlContent;
+    
+    let content = htmlContent;
+    articleHighlights.forEach((highlight) => {
+      const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedText})`, 'gi');
+      content = content.replace(
+        regex,
+        `<mark class="highlight-marker" data-highlight-id="${highlight.id}">$1</mark>`
+      );
+    });
+    return content;
+  }, [htmlContent, articleHighlights]);
+
   const handleBookmark = () => {
     if (!article) return;
     
@@ -171,11 +193,18 @@ export default function ArticlePage() {
 
   // Handle text highlight
   const handleHighlight = useCallback((text: string) => {
-    toast({
-      title: 'Text highlighted',
-      description: `"${text.slice(0, 50)}${text.length > 50 ? '...' : ''}"`,
-    });
-  }, []);
+    if (article) {
+      addHighlight({
+        articleId: String(article.pageid),
+        text,
+        color: 'yellow',
+      });
+      toast({
+        title: 'Text highlighted',
+        description: `"${text.slice(0, 50)}${text.length > 50 ? '...' : ''}"`,
+      });
+    }
+  }, [article, addHighlight]);
 
   // Handle add note from selection
   const handleAddNoteFromSelection = useCallback((text: string) => {
@@ -379,7 +408,7 @@ export default function ArticlePage() {
               <div
                 ref={articleContentRef}
                 className="wiki-content prose prose-invert prose-lg max-w-none select-text pr-4"
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                dangerouslySetInnerHTML={{ __html: highlightedContent() }}
                 draggable={isStudyMode}
                 onDragStart={handleDragStart}
               />
@@ -667,6 +696,18 @@ export default function ArticlePage() {
         .wiki-content img:hover {
           transform: scale(1.02);
           box-shadow: 0 4px 20px hsl(var(--primary) / 0.2);
+        }
+        .wiki-content .highlight-marker {
+          background: linear-gradient(120deg, hsl(48 96% 53% / 0.4) 0%, hsl(48 96% 53% / 0.6) 100%);
+          border-radius: 2px;
+          padding: 0.1em 0.2em;
+          margin: 0 -0.2em;
+          box-decoration-break: clone;
+          -webkit-box-decoration-break: clone;
+          transition: background 0.2s ease;
+        }
+        .wiki-content .highlight-marker:hover {
+          background: linear-gradient(120deg, hsl(48 96% 53% / 0.6) 0%, hsl(48 96% 53% / 0.8) 100%);
         }
       `}</style>
 

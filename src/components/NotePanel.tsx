@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Tag, Search, StickyNote } from 'lucide-react';
+import { X, Plus, Trash2, Tag, Search, StickyNote, Quote, Edit2 } from 'lucide-react';
 import { useStore, Note } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -175,9 +175,13 @@ interface NoteCardProps {
 function NoteCard({ note, index, onUpdate, onDelete }: NoteCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(note.content);
+  const [editTags, setEditTags] = useState(note.tags.join(', '));
 
   const handleSave = () => {
-    onUpdate(note.id, { content: editContent });
+    onUpdate(note.id, { 
+      content: editContent,
+      tags: editTags.split(',').map((t) => t.trim()).filter(Boolean),
+    });
     setIsEditing(false);
   };
 
@@ -186,46 +190,95 @@ function NoteCard({ note, index, onUpdate, onDelete }: NoteCardProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="p-4 rounded-xl bg-secondary/30 border border-border/30 group"
+      className="p-4 rounded-xl bg-secondary/30 border border-border/30 group hover:border-primary/20 transition-colors"
     >
+      {/* Header with article title and actions */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-xs text-primary font-medium">{note.articleTitle}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(note.id)}
-          className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Trash2 className="w-3 h-3 text-destructive" />
-        </Button>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsEditing(true)}
+            className="w-6 h-6"
+          >
+            <Edit2 className="w-3 h-3 text-muted-foreground" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(note.id)}
+            className="w-6 h-6"
+          >
+            <Trash2 className="w-3 h-3 text-destructive" />
+          </Button>
+        </div>
       </div>
 
+      {/* Highlighted text display */}
+      {note.highlightedText && (
+        <div className="p-3 rounded-lg bg-yellow-500/10 border-l-2 border-yellow-500 mb-3">
+          <div className="flex items-start gap-2">
+            <Quote className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-foreground/80 italic line-clamp-3">
+              "{note.highlightedText}"
+            </p>
+          </div>
+        </div>
+      )}
+
       {isEditing ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
+            placeholder="Add your thoughts about this highlight..."
             className="min-h-20 bg-transparent border-border/30 resize-none text-sm"
+            autoFocus
           />
+          <div className="relative">
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Tags (comma separated)"
+              value={editTags}
+              onChange={(e) => setEditTags(e.target.value)}
+              className="pl-9 bg-transparent border-border/30 text-sm"
+            />
+          </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleSave}>
               Save
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
+            <Button size="sm" variant="ghost" onClick={() => {
+              setIsEditing(false);
+              setEditContent(note.content);
+              setEditTags(note.tags.join(', '));
+            }}>
               Cancel
             </Button>
           </div>
         </div>
       ) : (
-        <p
-          onClick={() => setIsEditing(true)}
-          className="text-sm text-foreground/90 cursor-pointer hover:text-foreground transition-colors"
-        >
-          {note.content}
-        </p>
+        <>
+          {note.content ? (
+            <p
+              onClick={() => setIsEditing(true)}
+              className="text-sm text-foreground/90 cursor-pointer hover:text-foreground transition-colors"
+            >
+              {note.content}
+            </p>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-sm text-muted-foreground italic hover:text-foreground transition-colors"
+            >
+              Click to add a note...
+            </button>
+          )}
+        </>
       )}
 
-      {note.tags.length > 0 && (
+      {note.tags.length > 0 && !isEditing && (
         <div className="flex flex-wrap gap-1 mt-3">
           {note.tags.map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs px-2 py-0">
