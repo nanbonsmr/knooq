@@ -57,20 +57,41 @@ export default function TextSelectionTooltip({
     setSelectedText('');
   }, []);
 
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const selection = window.getSelection();
+    const text = selection?.toString().trim();
+    
+    if (text && text.length > 0) {
+      if (e.ctrlKey && e.key === 'h') {
+        e.preventDefault();
+        onHighlight(text);
+        window.getSelection()?.removeAllRanges();
+        setIsVisible(false);
+      } else if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        onAddNote(text);
+        window.getSelection()?.removeAllRanges();
+        setIsVisible(false);
+      }
+    }
+  }, [onHighlight, onAddNote]);
+
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
       container.addEventListener('mouseup', handleMouseUp);
       document.addEventListener('mousedown', handleMouseDown);
       container.addEventListener('scroll', handleScroll);
+      document.addEventListener('keydown', handleKeyDown);
 
       return () => {
         container.removeEventListener('mouseup', handleMouseUp);
         document.removeEventListener('mousedown', handleMouseDown);
         container.removeEventListener('scroll', handleScroll);
+        document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [containerRef, handleMouseUp, handleMouseDown, handleScroll]);
+  }, [containerRef, handleMouseUp, handleMouseDown, handleScroll, handleKeyDown]);
 
   const handleHighlight = () => {
     if (selectedText) {
