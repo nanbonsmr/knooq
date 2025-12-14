@@ -1,26 +1,79 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 export default function ArticleBreadcrumbs() {
   const { breadcrumbs, navigateToBreadcrumb } = useStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (breadcrumbs.length === 0) return null;
+
+  // Find current index in breadcrumbs based on current path
+  const currentIndex = breadcrumbs.findIndex(crumb => crumb.path === location.pathname);
 
   const handleBreadcrumbClick = (index: number, path: string) => {
     navigateToBreadcrumb(index);
     navigate(path);
   };
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if not in an input/textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft' && e.altKey) {
+        e.preventDefault();
+        // Navigate to previous breadcrumb
+        if (currentIndex > 0) {
+          const prevCrumb = breadcrumbs[currentIndex - 1];
+          navigateToBreadcrumb(currentIndex - 1);
+          navigate(prevCrumb.path);
+          toast({
+            title: 'Navigated back',
+            description: prevCrumb.title,
+          });
+        } else if (currentIndex === 0 || breadcrumbs.length > 0) {
+          // Go to home
+          navigate('/');
+          toast({
+            title: 'Navigated to Home',
+          });
+        }
+      } else if (e.key === 'ArrowRight' && e.altKey) {
+        e.preventDefault();
+        // Navigate to next breadcrumb (if exists)
+        if (currentIndex < breadcrumbs.length - 1 && currentIndex >= 0) {
+          const nextCrumb = breadcrumbs[currentIndex + 1];
+          navigate(nextCrumb.path);
+          toast({
+            title: 'Navigated forward',
+            description: nextCrumb.title,
+          });
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [breadcrumbs, currentIndex, navigate, navigateToBreadcrumb]);
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-1 text-sm overflow-x-auto scrollbar-hide pb-2"
-      aria-label="Breadcrumb"
+      aria-label="Breadcrumb (Alt+← / Alt+→ to navigate)"
     >
       {/* Home */}
       <Link
