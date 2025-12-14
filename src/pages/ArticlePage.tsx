@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -18,6 +18,7 @@ import {
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
 import StudyWorkspace from '@/components/StudyWorkspace';
+import ImageLightbox from '@/components/ImageLightbox';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -36,7 +37,9 @@ export default function ArticlePage() {
   const [readProgress, setReadProgress] = useState(0);
   const [showConceptMap, setShowConceptMap] = useState(false);
   const [relatedArticles, setRelatedArticles] = useState<WikiSearchResult[]>([]);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const articleContentRef = useRef<HTMLDivElement>(null);
 
   const { 
     addRecentArticle, 
@@ -160,6 +163,30 @@ export default function ArticlePage() {
       e.dataTransfer.setData('text/plain', selection.toString());
     }
   };
+
+  // Handle image clicks for lightbox
+  const handleImageClick = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      const img = target as HTMLImageElement;
+      const src = img.src;
+      const alt = img.alt || img.closest('figure')?.querySelector('figcaption')?.textContent || '';
+      if (src && !src.includes('svg')) {
+        e.preventDefault();
+        e.stopPropagation();
+        setLightboxImage({ src, alt });
+      }
+    }
+  }, []);
+
+  // Attach click listener to article content for images
+  useEffect(() => {
+    const container = articleContentRef.current;
+    if (container) {
+      container.addEventListener('click', handleImageClick);
+      return () => container.removeEventListener('click', handleImageClick);
+    }
+  }, [handleImageClick, htmlContent]);
 
   const ArticleContent = () => (
     <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
@@ -314,6 +341,7 @@ export default function ArticlePage() {
           {htmlContent && (
             <ScrollArea ref={contentRef} className={isStudyMode ? 'h-[calc(100vh-400px)]' : 'max-h-[70vh]'}>
               <div
+                ref={articleContentRef}
                 className="wiki-content prose prose-invert prose-lg max-w-none select-text"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
                 draggable={isStudyMode}
@@ -582,7 +610,23 @@ export default function ArticlePage() {
             max-width: 100%;
           }
         }
+        .wiki-content img {
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .wiki-content img:hover {
+          transform: scale(1.02);
+          box-shadow: 0 4px 20px hsl(var(--primary) / 0.2);
+        }
       `}</style>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        src={lightboxImage?.src || ''}
+        alt={lightboxImage?.alt || ''}
+        isOpen={!!lightboxImage}
+        onClose={() => setLightboxImage(null)}
+      />
     </div>
   );
 }
