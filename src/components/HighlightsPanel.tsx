@@ -51,7 +51,7 @@ export default function HighlightsPanel({
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed right-0 top-0 bottom-0 w-full max-w-sm glass border-l border-border/30 z-50"
+          className="fixed right-0 top-0 bottom-0 w-full sm:max-w-sm glass border-l border-border/30 z-50"
         >
           <div className="flex flex-col h-full">
             {/* Header */}

@@ -72,7 +72,7 @@ export default function ArticleBreadcrumbs() {
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-1 text-sm overflow-x-auto scrollbar-hide pb-2"
+      className="flex items-center gap-1 text-xs sm:text-sm overflow-x-auto scrollbar-hide pb-2 mb-2"
       aria-label="Breadcrumb (Alt+← / Alt+→ to navigate)"
     >
       {/* Home */}
@@ -80,7 +80,7 @@ export default function ArticleBreadcrumbs() {
         to="/"
         className="flex items-center gap-1 px-2 py-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex-shrink-0"
       >
-        <Home className="w-4 h-4" />
+        <Home className="w-3 h-3 sm:w-4 sm:h-4" />
         <span className="hidden sm:inline">Home</span>
       </Link>
 
@@ -92,11 +92,11 @@ export default function ArticleBreadcrumbs() {
           transition={{ delay: index * 0.05 }}
           className="flex items-center gap-1 flex-shrink-0"
         >
-          <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+          <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground/50" />
           <button
             onClick={() => handleBreadcrumbClick(index, crumb.path)}
             className={cn(
-              "px-2 py-1 rounded-lg transition-colors max-w-[150px] truncate",
+              "px-2 py-1 rounded-lg transition-colors max-w-[100px] sm:max-w-[150px] truncate text-xs sm:text-sm",
               index === breadcrumbs.length - 1
                 ? "text-primary font-medium bg-primary/10"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"

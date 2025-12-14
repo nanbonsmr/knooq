@@ -24,20 +24,20 @@ export default function Header() {
         className="fixed top-0 left-0 right-0 z-50"
       >
         <div className="glass border-b border-border/30">
-          <div className="container mx-auto px-6 py-4">
+          <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex items-center justify-between">
               {/* Logo */}
-              <Link to="/" className="flex items-center gap-3 group">
+              <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.7 }}
-                  className="w-10 h-10"
+                  className="w-8 h-8 sm:w-10 sm:h-10"
                 >
                   <img src={logo} alt="knooq Logo" className="w-full h-full object-contain" />
                 </motion.div>
                 <div>
-                  <h1 className="text-xl font-bold gradient-text">knooq</h1>
-                  <p className="text-xs text-muted-foreground -mt-1">Knowledge Platform</p>
+                  <h1 className="text-lg sm:text-xl font-bold gradient-text">knooq</h1>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground -mt-1 hidden sm:block">Knowledge Platform</p>
                 </div>
               </Link>
 

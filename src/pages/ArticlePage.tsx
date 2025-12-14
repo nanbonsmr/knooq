@@ -335,50 +335,52 @@ export default function ArticlePage() {
   }, [handleImageClick, handleHighlightClick, handleLinkClick, htmlContent]);
 
   const ArticleContent = () => (
-    <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
+    <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-3 sm:px-6' : 'container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-20'}`}>
       {/* Breadcrumb navigation */}
       {!isStudyMode && <ArticleBreadcrumbs />}
       
       {/* Back button and actions */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4 sm:mb-8 gap-2">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="gap-1 sm:gap-2 text-muted-foreground hover:text-foreground px-2 sm:px-4"
+          size="sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          <span className="hidden sm:inline">Back</span>
         </Button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
+          {/* Hide study mode on mobile */}
           <Button
             variant={isStudyMode ? "default" : "ghost"}
             size="icon"
             onClick={() => setStudyMode(!isStudyMode)}
-            className="rounded-full"
+            className="rounded-full hidden sm:flex w-8 h-8 sm:w-10 sm:h-10"
             title="Study Mode"
           >
-            <BookOpen className="w-5 h-5" />
+            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             variant={showConceptMap ? "default" : "ghost"}
             size="icon"
             onClick={() => setShowConceptMap(!showConceptMap)}
-            className="rounded-full"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
             title="Concept Map"
           >
-            <Network className="w-5 h-5" />
+            <Network className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleBookmark}
-            className="rounded-full"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
           >
             {bookmarked ? (
-              <BookmarkCheck className="w-5 h-5 text-primary" />
+              <BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             ) : (
-              <Bookmark className="w-5 h-5" />
+              <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </Button>
           {!isStudyMode && (
@@ -387,9 +389,9 @@ export default function ArticlePage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsHighlightsPanelOpen(!isHighlightsPanelOpen)}
-                className="rounded-full relative"
+                className="rounded-full relative hidden sm:flex w-8 h-8 sm:w-10 sm:h-10"
               >
-                <Highlighter className={`w-5 h-5 ${isHighlightsPanelOpen ? 'text-yellow-500' : ''}`} />
+                <Highlighter className={`w-4 h-4 sm:w-5 sm:h-5 ${isHighlightsPanelOpen ? 'text-yellow-500' : ''}`} />
                 {articleHighlightsCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 text-background text-xs rounded-full flex items-center justify-center font-medium">
                     {articleHighlightsCount}
@@ -400,9 +402,9 @@ export default function ArticlePage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setNotePanelOpen(!isNotePanelOpen)}
-                className="rounded-full"
+                className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
               >
-                <StickyNote className={`w-5 h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
+                <StickyNote className={`w-4 h-4 sm:w-5 sm:h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
               </Button>
             </>
           )}
@@ -410,17 +412,17 @@ export default function ArticlePage() {
             variant="ghost"
             size="icon"
             onClick={handleShare}
-            className="rounded-full"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleOpenWikipedia}
-            className="rounded-full"
+            className="rounded-full hidden sm:flex w-8 h-8 sm:w-10 sm:h-10"
           >
-            <ExternalLink className="w-5 h-5" />
+            <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
         </div>
       </div>
@@ -456,7 +458,7 @@ export default function ArticlePage() {
               </motion.div>
             )}
 
-            <h1 className={`font-bold text-foreground mb-4 ${isStudyMode ? 'text-2xl md:text-3xl' : 'text-4xl md:text-5xl'}`}>
+            <h1 className={`font-bold text-foreground mb-4 ${isStudyMode ? 'text-xl sm:text-2xl md:text-3xl' : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl'}`}>
               {article.title}
             </h1>
 
