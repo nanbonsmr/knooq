@@ -20,8 +20,8 @@ import NotePanel from '@/components/NotePanel';
 import StudyWorkspace from '@/components/StudyWorkspace';
 import ImageLightbox from '@/components/ImageLightbox';
 import TableOfContents from '@/components/TableOfContents';
+import TextSelectionTooltip from '@/components/TextSelectionTooltip';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
 import { useStore } from '@/store/useStore';
@@ -51,7 +51,8 @@ export default function ArticlePage() {
     setNotePanelOpen,
     isNotePanelOpen,
     isStudyMode,
-    setStudyMode
+    setStudyMode,
+    addNote
   } = useStore();
 
   const bookmarked = article ? isBookmarked(article.pageid) : false;
@@ -167,6 +168,34 @@ export default function ArticlePage() {
       e.dataTransfer.setData('text/plain', selection.toString());
     }
   };
+
+  // Handle text highlight
+  const handleHighlight = useCallback((text: string) => {
+    toast({
+      title: 'Text highlighted',
+      description: `"${text.slice(0, 50)}${text.length > 50 ? '...' : ''}"`,
+    });
+  }, []);
+
+  // Handle add note from selection
+  const handleAddNoteFromSelection = useCallback((text: string) => {
+    if (article) {
+      addNote({
+        articleTitle: article.title,
+        articleId: String(article.pageid),
+        content: '',
+        highlightedText: text,
+        tags: [],
+      });
+      toast({
+        title: 'Note added',
+        description: 'Highlighted text saved to notes',
+      });
+      if (!isStudyMode) {
+        setNotePanelOpen(true);
+      }
+    }
+  }, [article, addNote, isStudyMode, setNotePanelOpen]);
 
   // Handle image clicks for lightbox
   const handleImageClick = useCallback((e: MouseEvent) => {
@@ -369,6 +398,13 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-background">
       <Header />
       {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
+
+      {/* Text Selection Tooltip */}
+      <TextSelectionTooltip
+        containerRef={articleContentRef}
+        onHighlight={handleHighlight}
+        onAddNote={handleAddNoteFromSelection}
+      />
 
       {/* Progress bar */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50">
