@@ -10,12 +10,16 @@ import {
   ExternalLink,
   Loader2,
   Clock,
-  ChevronDown
+  ChevronDown,
+  BookOpen,
+  X
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
+import StudyWorkspace from '@/components/StudyWorkspace';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, WikiArticle } from '@/lib/wikipedia';
 import { useStore } from '@/store/useStore';
 import { toast } from '@/hooks/use-toast';
@@ -35,7 +39,9 @@ export default function ArticlePage() {
     removeBookmark, 
     isBookmarked, 
     setNotePanelOpen,
-    isNotePanelOpen
+    isNotePanelOpen,
+    isStudyMode,
+    setStudyMode
   } = useStore();
 
   const bookmarked = article ? isBookmarked(article.pageid) : false;
@@ -64,7 +70,6 @@ export default function ArticlePage() {
         }
 
         if (content) {
-          // Process HTML content for styling
           const processedContent = processWikiContent(content);
           setHtmlContent(processedContent);
         }
@@ -83,7 +88,6 @@ export default function ArticlePage() {
     fetchArticle();
   }, [title, addRecentArticle]);
 
-  // Track scroll progress
   useEffect(() => {
     const handleScroll = () => {
       if (contentRef.current) {
@@ -141,10 +145,178 @@ export default function ArticlePage() {
     }
   };
 
+  // Make text draggable for study mode
+  const handleDragStart = (e: React.DragEvent) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      e.dataTransfer.setData('text/plain', selection.toString());
+    }
+  };
+
+  const ArticleContent = () => (
+    <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
+      {/* Back button and actions */}
+      <div className="flex items-center justify-between mb-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isStudyMode ? "default" : "ghost"}
+            size="icon"
+            onClick={() => setStudyMode(!isStudyMode)}
+            className="rounded-full"
+            title="Study Mode"
+          >
+            <BookOpen className={`w-5 h-5 ${isStudyMode ? '' : ''}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBookmark}
+            className="rounded-full"
+          >
+            {bookmarked ? (
+              <BookmarkCheck className="w-5 h-5 text-primary" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
+          </Button>
+          {!isStudyMode && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setNotePanelOpen(!isNotePanelOpen)}
+              className="rounded-full"
+            >
+              <StickyNote className={`w-5 h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="rounded-full"
+          >
+            <Share2 className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleOpenWikipedia}
+            className="rounded-full"
+          >
+            <ExternalLink className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-muted-foreground">Loading article...</p>
+          </div>
+        </div>
+      ) : article ? (
+        <motion.article
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className={isStudyMode ? '' : 'max-w-4xl mx-auto'}
+        >
+          {/* Article Header */}
+          <header className="mb-8">
+            {article.thumbnail && !isStudyMode && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative h-64 md:h-96 rounded-3xl overflow-hidden mb-8"
+              >
+                <img
+                  src={article.thumbnail.source}
+                  alt={article.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+              </motion.div>
+            )}
+
+            <h1 className={`font-bold text-foreground mb-4 ${isStudyMode ? 'text-2xl md:text-3xl' : 'text-4xl md:text-5xl'}`}>
+              {article.title}
+            </h1>
+
+            <div className="flex items-center gap-4 text-muted-foreground mb-6">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm">
+                  {Math.ceil(article.extract.split(' ').length / 200)} min read
+                </span>
+              </div>
+              {isStudyMode && (
+                <div className="flex items-center gap-2 text-primary">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-sm font-medium">Study Mode Active</span>
+                </div>
+              )}
+            </div>
+
+            {/* Summary card */}
+            <div className="glass-card rounded-2xl p-6 mb-8">
+              <h2 className="text-lg font-semibold text-primary mb-3">Summary</h2>
+              <p 
+                className="text-foreground/90 leading-relaxed select-text"
+                draggable={isStudyMode}
+                onDragStart={handleDragStart}
+              >
+                {article.extract}
+              </p>
+            </div>
+
+            {/* Scroll indicator - only show when not in study mode */}
+            {!isStudyMode && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="flex flex-col items-center gap-2 text-muted-foreground"
+              >
+                <span className="text-sm">Scroll for full article</span>
+                <ChevronDown className="w-5 h-5 animate-bounce" />
+              </motion.div>
+            )}
+          </header>
+
+          {/* Full Article Content */}
+          {htmlContent && (
+            <ScrollArea ref={contentRef} className={isStudyMode ? 'h-[calc(100vh-400px)]' : 'max-h-[70vh]'}>
+              <div
+                className="wiki-content prose prose-invert prose-lg max-w-none select-text"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                draggable={isStudyMode}
+                onDragStart={handleDragStart}
+              />
+            </ScrollArea>
+          )}
+        </motion.article>
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-muted-foreground">Article not found</p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />
+      {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
 
       {/* Progress bar */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50">
@@ -161,138 +333,34 @@ export default function ArticlePage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-[150px]" />
       </div>
 
-      <main className={`relative z-10 pt-24 pb-20 transition-all duration-300 ${isNotePanelOpen ? 'mr-[400px]' : ''}`}>
-        <div className="container mx-auto px-6">
-          {/* Back button and actions */}
-          <div className="flex items-center justify-between mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBookmark}
-                className="rounded-full"
-              >
-                {bookmarked ? (
-                  <BookmarkCheck className="w-5 h-5 text-primary" />
-                ) : (
-                  <Bookmark className="w-5 h-5" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setNotePanelOpen(!isNotePanelOpen)}
-                className="rounded-full"
-              >
-                <StickyNote className={`w-5 h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShare}
-                className="rounded-full"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleOpenWikipedia}
-                className="rounded-full"
-              >
-                <ExternalLink className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                <p className="text-muted-foreground">Loading article...</p>
+      {isStudyMode ? (
+        /* Study Mode - Split View */
+        <main className="relative z-10 pt-20 h-screen">
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={60} minSize={40}>
+              <div className="h-full overflow-auto glass border-r border-border/30">
+                <ArticleContent />
               </div>
-            </div>
-          ) : article ? (
-            <motion.article
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-4xl mx-auto"
-            >
-              {/* Article Header */}
-              <header className="mb-8">
-                {article.thumbnail && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative h-64 md:h-96 rounded-3xl overflow-hidden mb-8"
-                  >
-                    <img
-                      src={article.thumbnail.source}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                  </motion.div>
-                )}
-
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                  {article.title}
-                </h1>
-
-                <div className="flex items-center gap-4 text-muted-foreground mb-6">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">
-                      {Math.ceil(article.extract.split(' ').length / 200)} min read
-                    </span>
-                  </div>
-                </div>
-
-                {/* Summary card */}
-                <div className="glass-card rounded-2xl p-6 mb-8">
-                  <h2 className="text-lg font-semibold text-primary mb-3">Summary</h2>
-                  <p className="text-foreground/90 leading-relaxed">{article.extract}</p>
-                </div>
-
-                {/* Scroll indicator */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                  className="flex flex-col items-center gap-2 text-muted-foreground"
-                >
-                  <span className="text-sm">Scroll for full article</span>
-                  <ChevronDown className="w-5 h-5 animate-bounce" />
-                </motion.div>
-              </header>
-
-              {/* Full Article Content */}
-              {htmlContent && (
-                <ScrollArea ref={contentRef} className="max-h-[70vh]">
-                  <div
-                    className="wiki-content prose prose-invert prose-lg max-w-none"
-                    dangerouslySetInnerHTML={{ __html: htmlContent }}
-                  />
-                </ScrollArea>
-              )}
-            </motion.article>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground">Article not found</p>
-            </div>
-          )}
-        </div>
-      </main>
+            </ResizablePanel>
+            
+            <ResizableHandle withHandle className="bg-border/30 hover:bg-primary/30 transition-colors" />
+            
+            <ResizablePanel defaultSize={40} minSize={25}>
+              <div className="h-full glass">
+                <StudyWorkspace 
+                  articleTitle={article?.title} 
+                  articleId={String(article?.pageid)} 
+                />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </main>
+      ) : (
+        /* Normal Mode */
+        <main className={`relative z-10 transition-all duration-300 ${isNotePanelOpen ? 'mr-[400px]' : ''}`}>
+          <ArticleContent />
+        </main>
+      )}
 
       {/* Wiki content styles */}
       <style>{`
@@ -373,17 +441,18 @@ export default function ArticlePage() {
         .wiki-content .mw-references-wrap {
           display: none;
         }
+        .wiki-content ::selection {
+          background: hsl(var(--primary) / 0.4);
+        }
       `}</style>
     </div>
   );
 }
 
 function processWikiContent(html: string): string {
-  // Create a temporary element to parse HTML
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
-  // Remove unwanted elements
   const selectorsToRemove = [
     '.mw-editsection',
     '.reference',
@@ -400,7 +469,6 @@ function processWikiContent(html: string): string {
     doc.querySelectorAll(selector).forEach((el) => el.remove());
   });
 
-  // Get the main content
   const content = doc.querySelector('.mw-parser-output') || doc.body;
 
   return content.innerHTML;
