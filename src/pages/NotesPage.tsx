@@ -1,17 +1,29 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { StickyNote, Search, Trash2, Tag, FileText, Download } from 'lucide-react';
+import { StickyNote, Search, Trash2, Tag, FileText, Download, Eye, Highlighter, ChevronDown, Quote } from 'lucide-react';
 import Header from '@/components/Header';
+import NoteDetailModal from '@/components/NoteDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useStore } from '@/store/useStore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useStore, Note } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
+import { exportToMarkdown, exportNotesOnly, exportHighlightsOnly, downloadMarkdown } from '@/lib/export';
+import { toast } from '@/hooks/use-toast';
 
 export default function NotesPage() {
-  const { notes, deleteNote } = useStore();
+  const { notes, highlights, deleteNote } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const navigate = useNavigate();
 
   // Get all unique tags
@@ -21,7 +33,8 @@ export default function NotesPage() {
   const filteredNotes = notes.filter((note) => {
     const matchesSearch = searchQuery
       ? note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.articleTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        note.articleTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (note.highlightedText?.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
     const matchesTag = selectedTag ? note.tags.includes(selectedTag) : true;
     return matchesSearch && matchesTag;
@@ -35,18 +48,27 @@ export default function NotesPage() {
     return acc;
   }, {} as Record<string, typeof notes>);
 
-  const exportNotes = () => {
-    const markdown = notes
-      .map((note) => `## ${note.articleTitle}\n\n${note.content}\n\nTags: ${note.tags.join(', ')}\n\n---\n`)
-      .join('\n');
+  const handleExportAll = () => {
+    const markdown = exportToMarkdown(notes, highlights);
+    downloadMarkdown(markdown, 'knooq-export.md');
+    toast({ title: 'Exported successfully', description: `${notes.length} notes and ${highlights.length} highlights` });
+  };
 
-    const blob = new Blob([markdown], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'knooq-notes.md';
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportNotes = () => {
+    const markdown = exportNotesOnly(notes);
+    downloadMarkdown(markdown, 'knooq-notes.md');
+    toast({ title: 'Notes exported', description: `${notes.length} notes` });
+  };
+
+  const handleExportHighlights = () => {
+    const markdown = exportHighlightsOnly(highlights);
+    downloadMarkdown(markdown, 'knooq-highlights.md');
+    toast({ title: 'Highlights exported', description: `${highlights.length} highlights` });
+  };
+
+  const handleViewNote = (note: Note) => {
+    setSelectedNote(note);
+    setIsDetailOpen(true);
   };
 
   return (
@@ -70,16 +92,38 @@ export default function NotesPage() {
                 <StickyNote className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Notes</h1>
-                <p className="text-muted-foreground">{notes.length} notes collected</p>
+                <h1 className="text-3xl font-bold">Notes & Highlights</h1>
+                <p className="text-muted-foreground">
+                  {notes.length} notes · {highlights.length} highlights
+                </p>
               </div>
             </div>
 
-            {notes.length > 0 && (
-              <Button onClick={exportNotes} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Export
-              </Button>
+            {(notes.length > 0 || highlights.length > 0) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Download className="w-4 h-4" />
+                    Export
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={handleExportAll} className="gap-2">
+                    <FileText className="w-4 h-4" />
+                    Export All
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleExportNotes} className="gap-2" disabled={notes.length === 0}>
+                    <StickyNote className="w-4 h-4" />
+                    Notes Only ({notes.length})
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportHighlights} className="gap-2" disabled={highlights.length === 0}>
+                    <Highlighter className="w-4 h-4" />
+                    Highlights Only ({highlights.length})
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
@@ -88,7 +132,7 @@ export default function NotesPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search notes..."
+                placeholder="Search notes and highlights..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 bg-secondary/50 border-border/30"
@@ -120,12 +164,12 @@ export default function NotesPage() {
             )}
           </div>
 
-          {notes.length === 0 ? (
+          {notes.length === 0 && highlights.length === 0 ? (
             <div className="text-center py-20">
               <StickyNote className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">No notes yet</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-2">No notes or highlights yet</h2>
               <p className="text-muted-foreground mb-6">
-                Start taking notes while reading articles
+                Start taking notes and highlighting text while reading articles
               </p>
               <Button onClick={() => navigate('/')}>Start Exploring</Button>
             </div>
@@ -150,18 +194,49 @@ export default function NotesPage() {
                     {articleNotes.map((note) => (
                       <div
                         key={note.id}
-                        className="p-4 rounded-xl bg-secondary/30 border border-border/30 group"
+                        className="p-4 rounded-xl bg-secondary/30 border border-border/30 group hover:border-primary/20 transition-colors cursor-pointer"
+                        onClick={() => handleViewNote(note)}
                       >
+                        {/* Highlighted text preview */}
+                        {note.highlightedText && (
+                          <div className="flex items-start gap-2 mb-3 p-2 rounded-lg bg-yellow-500/10 border-l-2 border-yellow-500">
+                            <Quote className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-foreground/80 italic line-clamp-2">
+                              "{note.highlightedText}"
+                            </p>
+                          </div>
+                        )}
+
                         <div className="flex items-start justify-between gap-4">
-                          <p className="text-foreground/90 flex-1">{note.content}</p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteNote(note.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
+                          {note.content ? (
+                            <p className="text-foreground/90 flex-1 line-clamp-2">{note.content}</p>
+                          ) : (
+                            <p className="text-muted-foreground italic flex-1">No notes added</p>
+                          )}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewNote(note);
+                              }}
+                              className="w-8 h-8"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNote(note.id);
+                              }}
+                              className="w-8 h-8"
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
 
                         {note.tags.length > 0 && (
@@ -186,6 +261,16 @@ export default function NotesPage() {
           )}
         </motion.div>
       </main>
+
+      {/* Note Detail Modal */}
+      <NoteDetailModal
+        note={selectedNote}
+        isOpen={isDetailOpen}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setSelectedNote(null);
+        }}
+      />
     </div>
   );
 }

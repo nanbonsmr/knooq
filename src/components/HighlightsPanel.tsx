@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Highlighter, Trash2, Search, ChevronRight } from 'lucide-react';
+import { X, Highlighter, Trash2, Search, ChevronRight, Download } from 'lucide-react';
 import { useStore, Highlight } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
+import { exportHighlightsOnly, downloadMarkdown } from '@/lib/export';
 
 interface HighlightsPanelProps {
   articleId?: string;
@@ -62,14 +63,31 @@ export default function HighlightsPanel({
                   {articleHighlights.length}
                 </Badge>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="rounded-full"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {articleHighlights.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const markdown = exportHighlightsOnly(articleHighlights);
+                      downloadMarkdown(markdown, 'highlights.md');
+                      toast({ title: 'Highlights exported' });
+                    }}
+                    className="rounded-full"
+                    title="Export highlights"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
 
             {/* Search */}
