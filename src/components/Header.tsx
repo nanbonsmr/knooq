@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Sparkles } from 'lucide-react';
+import { BookOpen, Compass, BookMarked } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export default function Header() {
   const location = useLocation();
@@ -19,11 +20,11 @@ export default function Header() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <motion.div
-                whileHover={{ rotate: 180 }}
-                transition={{ duration: 0.5 }}
-                className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.7 }}
+                className="w-10 h-10"
               >
-                <Sparkles className="w-5 h-5 text-white" />
+                <img src={logo} alt="Nexus Logo" className="w-full h-full object-contain" />
               </motion.div>
               <div>
                 <h1 className="text-xl font-bold gradient-text">Nexus</h1>
