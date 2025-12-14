@@ -86,19 +86,19 @@ export default function NoteDetailModal({ note, isOpen, onClose }: NoteDetailMod
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="relative w-full max-w-2xl max-h-[80vh] overflow-hidden glass-card rounded-2xl border border-border/30"
+            className="relative w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden glass-card rounded-xl sm:rounded-2xl border border-border/30 mx-2"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border/30">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border/30">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div>
-                  <h2 className="font-semibold text-lg">Note Details</h2>
+                <div className="min-w-0">
+                  <h2 className="font-semibold text-base sm:text-lg">Note Details</h2>
                   <button
                     onClick={handleGoToArticle}
-                    className="text-sm text-primary hover:underline"
+                    className="text-xs sm:text-sm text-primary hover:underline truncate block max-w-[150px] sm:max-w-none"
                   >
                     {note.articleTitle}
                   </button>
@@ -173,13 +173,13 @@ export default function NoteDetailModal({ note, isOpen, onClose }: NoteDetailMod
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-120px)] sm:max-h-[calc(80vh-120px)]">
               {/* Highlighted text */}
               {note.highlightedText && (
-                <div className="p-4 rounded-xl bg-yellow-500/10 border-l-4 border-yellow-500 mb-6">
-                  <div className="flex items-start gap-3">
-                    <Quote className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
-                    <p className="text-foreground/90 italic text-lg leading-relaxed">
+                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-yellow-500/10 border-l-4 border-yellow-500 mb-4 sm:mb-6">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Quote className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0 mt-0.5 sm:mt-1" />
+                    <p className="text-foreground/90 italic text-sm sm:text-lg leading-relaxed">
                       "{note.highlightedText}"
                     </p>
                   </div>
@@ -267,13 +267,13 @@ export default function NoteDetailModal({ note, isOpen, onClose }: NoteDetailMod
 
                   {/* Metadata */}
                   <div className="pt-4 border-t border-border/30">
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>Created: {new Date(note.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
                       </div>
                     </div>

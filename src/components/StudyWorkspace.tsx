@@ -78,26 +78,26 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
   return (
     <div id="study-workspace" className="flex flex-col h-full bg-background/50">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/30 glass">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/30 glass">
         <div className="flex items-center gap-2">
-          <StickyNote className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-lg">Study Notes</h2>
+          <StickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <h2 className="font-semibold text-base sm:text-lg">Study Notes</h2>
           <Badge variant="secondary" className="text-xs">
             {filteredNotes.length}
           </Badge>
         </div>
       </div>
 
-      {/* Drag hint */}
-      <div className="px-4 py-3 bg-primary/5 border-b border-border/20">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {/* Drag hint - hide on small screens */}
+      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-primary/5 border-b border-border/20 hidden sm:block">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
           <GripVertical className="w-4 h-4" />
           <span>Select text from article and drag here to create a note</span>
         </div>
       </div>
 
       {/* Search */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -110,7 +110,7 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
       </div>
 
       {/* Add Note Section */}
-      <div className="px-4 pb-4">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
         <AnimatePresence mode="wait">
           {isAddingNote ? (
             <motion.div
@@ -176,8 +176,8 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
       </div>
 
       {/* Notes List */}
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-3 pb-4">
+      <ScrollArea className="flex-1 px-3 sm:px-4">
+        <div className="space-y-2 sm:space-y-3 pb-4">
           {filteredNotes.length === 0 ? (
             <div className="text-center py-12">
               <StickyNote className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />

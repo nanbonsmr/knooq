@@ -108,20 +108,20 @@ export default function NotesPage() {
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-[150px]" />
       </div>
 
-      <main className="relative z-10 container mx-auto px-6 pt-32 pb-20">
+      <main className="relative z-10 container mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                <StickyNote className="w-6 h-6 text-accent" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
+                <StickyNote className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Notes & Highlights</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-xl sm:text-3xl font-bold">Notes & Highlights</h1>
+                <p className="text-xs sm:text-base text-muted-foreground">
                   {notes.length} notes · {highlights.length} highlights
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function NotesPage() {
             {(notes.length > 0 || highlights.length > 0) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto">
                     <Download className="w-4 h-4" />
                     Export
                     <ChevronDown className="w-4 h-4" />
@@ -177,8 +177,8 @@ export default function NotesPage() {
           </div>
 
           {/* Search and filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search notes and highlights..."
@@ -189,11 +189,12 @@ export default function NotesPage() {
             </div>
 
             {allTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <Button
                   variant={selectedTag === null ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedTag(null)}
+                  className="flex-shrink-0"
                 >
                   All
                 </Button>
@@ -203,7 +204,7 @@ export default function NotesPage() {
                     variant={selectedTag === tag ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedTag(tag)}
-                    className="gap-1"
+                    className="gap-1 flex-shrink-0"
                   >
                     <Tag className="w-3 h-3" />
                     {tag}
@@ -214,27 +215,27 @@ export default function NotesPage() {
           </div>
 
           {notes.length === 0 && highlights.length === 0 ? (
-            <div className="text-center py-20">
-              <StickyNote className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">No notes or highlights yet</h2>
-              <p className="text-muted-foreground mb-6">
+            <div className="text-center py-12 sm:py-20">
+              <StickyNote className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">No notes or highlights yet</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-6 px-4">
                 Start taking notes and highlighting text while reading articles
               </p>
               <Button onClick={() => navigate('/')}>Start Exploring</Button>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {Object.entries(groupedNotes).map(([articleTitle, articleNotes]) => (
                 <motion.section
                   key={articleTitle}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="glass-card rounded-2xl p-6"
+                  className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6"
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <h2 className="text-lg font-semibold text-foreground">{articleTitle}</h2>
-                    <Badge variant="secondary" className="ml-auto">
+                  <div className="flex items-start sm:items-center gap-2 mb-4 flex-wrap">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5 sm:mt-0" />
+                    <h2 className="text-base sm:text-lg font-semibold text-foreground flex-1 min-w-0 line-clamp-1">{articleTitle}</h2>
+                    <Badge variant="secondary" className="text-xs">
                       {articleNotes.length} notes
                     </Badge>
                   </div>
