@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Sparkles, Zap, Loader2, Globe, ArrowRight, Clock, BookOpen, Star } from 'lucide-react';
 import Header from '@/components/Header';
@@ -41,6 +41,7 @@ export default function ExplorePage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const { recentArticles, notes, highlights } = useStore();
   const navigate = useNavigate();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -73,13 +74,33 @@ export default function ExplorePage() {
     navigate(`/article/${encodeURIComponent(category)}`);
   };
 
-  const handleLoadMore = () => {
+  const loadMoreArticles = useCallback(() => {
+    if (loadingMore || visibleTrending >= trendingArticles.length) return;
+    
     setLoadingMore(true);
     setTimeout(() => {
       setVisibleTrending(prev => Math.min(prev + 8, trendingArticles.length));
       setLoadingMore(false);
     }, 500);
-  };
+  }, [loadingMore, visibleTrending, trendingArticles.length]);
+
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore && visibleTrending < trendingArticles.length) {
+          loadMoreArticles();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loadMoreArticles, loadingMore, visibleTrending, trendingArticles.length]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -382,35 +403,32 @@ export default function ExplorePage() {
                 </AnimatePresence>
               </motion.div>
 
-              {/* Load More Button */}
-              {visibleTrending < trendingArticles.length && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex justify-center mt-10"
-                >
-                  <Button
-                    onClick={handleLoadMore}
-                    disabled={loadingMore}
-                    size="lg"
-                    className="group relative px-8 py-6 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 border border-primary/30 hover:border-primary/50 text-foreground font-medium transition-all duration-300"
+              {/* Infinite Scroll Trigger */}
+              <div ref={loadMoreRef} className="w-full py-8">
+                {visibleTrending < trendingArticles.length && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center gap-3"
                   >
                     {loadingMore ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Loading...
-                      </>
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <span className="text-sm">Loading more articles...</span>
+                      </div>
                     ) : (
-                      <>
-                        <span>Load More Articles</span>
-                        <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/20 text-xs">
-                          {trendingArticles.length - visibleTrending} more
-                        </span>
-                      </>
+                      <p className="text-sm text-muted-foreground/60">
+                        Scroll for more • {trendingArticles.length - visibleTrending} remaining
+                      </p>
                     )}
-                  </Button>
-                </motion.div>
-              )}
+                  </motion.div>
+                )}
+                {visibleTrending >= trendingArticles.length && trendingArticles.length > 8 && (
+                  <p className="text-center text-sm text-muted-foreground/60">
+                    You've seen all trending articles
+                  </p>
+                )}
+              </div>
             </div>
           </section>
         )}
