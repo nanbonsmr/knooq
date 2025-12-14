@@ -519,13 +519,68 @@ export default function ArticlePage() {
           color: hsl(var(--muted-foreground));
           margin-top: 0.5rem;
         }
-        .wiki-content .infobox,
         .wiki-content .navbox,
         .wiki-content .mw-references-wrap {
           display: none;
         }
+        .wiki-content .infobox {
+          float: right;
+          margin: 0 0 1rem 1.5rem;
+          max-width: 300px;
+          background: hsl(var(--secondary) / 0.5);
+          border: 1px solid hsl(var(--border));
+          border-radius: 1rem;
+          padding: 1rem;
+          font-size: 0.875rem;
+        }
+        .wiki-content .infobox th,
+        .wiki-content .infobox td {
+          padding: 0.5rem;
+          border: none;
+          border-bottom: 1px solid hsl(var(--border) / 0.3);
+        }
+        .wiki-content .infobox img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.5rem;
+        }
+        .wiki-content .thumb {
+          margin: 1.5rem auto;
+          max-width: 100%;
+        }
+        .wiki-content .thumb.tright {
+          float: right;
+          margin: 0 0 1rem 1.5rem;
+          max-width: 300px;
+        }
+        .wiki-content .thumb.tleft {
+          float: left;
+          margin: 0 1.5rem 1rem 0;
+          max-width: 300px;
+        }
+        .wiki-content .thumbinner {
+          background: hsl(var(--secondary) / 0.3);
+          border: 1px solid hsl(var(--border) / 0.3);
+          border-radius: 0.75rem;
+          padding: 0.5rem;
+        }
+        .wiki-content .thumbcaption {
+          font-size: 0.8rem;
+          color: hsl(var(--muted-foreground));
+          padding: 0.5rem;
+          text-align: center;
+        }
         .wiki-content ::selection {
           background: hsl(var(--primary) / 0.4);
+        }
+        @media (max-width: 768px) {
+          .wiki-content .infobox,
+          .wiki-content .thumb.tright,
+          .wiki-content .thumb.tleft {
+            float: none;
+            margin: 1rem auto;
+            max-width: 100%;
+          }
         }
       `}</style>
     </div>
@@ -546,10 +601,44 @@ function processWikiContent(html: string): string {
     'style',
     'script',
     '.mw-empty-elt',
+    '.shortdescription',
+    '.metadata',
+    '.ambox',
+    '.hatnote',
   ];
 
   selectorsToRemove.forEach((selector) => {
     doc.querySelectorAll(selector).forEach((el) => el.remove());
+  });
+
+  // Fix all image src URLs to be absolute
+  doc.querySelectorAll('img').forEach((img) => {
+    const src = img.getAttribute('src');
+    if (src && src.startsWith('//')) {
+      img.setAttribute('src', 'https:' + src);
+    }
+    // Also fix srcset
+    const srcset = img.getAttribute('srcset');
+    if (srcset) {
+      const fixedSrcset = srcset.replace(/\/\//g, 'https://');
+      img.setAttribute('srcset', fixedSrcset);
+    }
+    // Add loading lazy
+    img.setAttribute('loading', 'lazy');
+  });
+
+  // Fix all links to be absolute
+  doc.querySelectorAll('a').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('/wiki/')) {
+      link.setAttribute('href', 'https://en.wikipedia.org' + href);
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    } else if (href && href.startsWith('./')) {
+      link.setAttribute('href', 'https://en.wikipedia.org/wiki/' + href.slice(2));
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    }
   });
 
   const content = doc.querySelector('.mw-parser-output') || doc.body;
