@@ -13,7 +13,8 @@ import {
   ChevronDown,
   BookOpen,
   Network,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
@@ -54,10 +55,13 @@ export default function ArticlePage() {
     setStudyMode,
     addNote,
     addHighlight,
+    removeHighlight,
     highlights
   } = useStore();
 
   const bookmarked = article ? isBookmarked(article.pageid) : false;
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
+  const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     async function fetchArticle() {
@@ -241,14 +245,48 @@ export default function ArticlePage() {
     }
   }, []);
 
-  // Attach click listener to article content for images
+  // Handle highlight click for deletion
+  const handleHighlightClick = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('highlight-marker')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const highlightId = target.getAttribute('data-highlight-id');
+      if (highlightId) {
+        const rect = target.getBoundingClientRect();
+        setActiveHighlightId(highlightId);
+        setHighlightTooltipPos({
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10,
+        });
+      }
+    } else {
+      setActiveHighlightId(null);
+      setHighlightTooltipPos(null);
+    }
+  }, []);
+
+  const handleDeleteHighlight = useCallback(() => {
+    if (activeHighlightId) {
+      removeHighlight(activeHighlightId);
+      setActiveHighlightId(null);
+      setHighlightTooltipPos(null);
+      toast({ title: 'Highlight removed' });
+    }
+  }, [activeHighlightId, removeHighlight]);
+
+  // Attach click listener to article content for images and highlights
   useEffect(() => {
     const container = articleContentRef.current;
     if (container) {
       container.addEventListener('click', handleImageClick);
-      return () => container.removeEventListener('click', handleImageClick);
+      container.addEventListener('click', handleHighlightClick);
+      return () => {
+        container.removeEventListener('click', handleImageClick);
+        container.removeEventListener('click', handleHighlightClick);
+      };
     }
-  }, [handleImageClick, htmlContent]);
+  }, [handleImageClick, handleHighlightClick, htmlContent]);
 
   const ArticleContent = () => (
     <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
@@ -434,6 +472,34 @@ export default function ArticlePage() {
         onHighlight={handleHighlight}
         onAddNote={handleAddNoteFromSelection}
       />
+
+      {/* Highlight Delete Tooltip */}
+      <AnimatePresence>
+        {activeHighlightId && highlightTooltipPos && (
+          <motion.div
+            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="fixed z-[100] flex items-center gap-1 p-1.5 rounded-xl glass-card border border-border/50 shadow-lg"
+            style={{
+              left: `${highlightTooltipPos.x}px`,
+              top: `${highlightTooltipPos.y}px`,
+              transform: 'translate(-50%, -100%)',
+            }}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteHighlight}
+              className="h-8 px-3 gap-2 text-sm hover:bg-destructive/20 hover:text-destructive rounded-lg"
+            >
+              <Trash2 className="w-4 h-4" />
+              Remove Highlight
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Progress bar */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50">
@@ -705,9 +771,11 @@ export default function ArticlePage() {
           box-decoration-break: clone;
           -webkit-box-decoration-break: clone;
           transition: background 0.2s ease;
+          cursor: pointer;
         }
         .wiki-content .highlight-marker:hover {
           background: linear-gradient(120deg, hsl(48 96% 53% / 0.6) 0%, hsl(48 96% 53% / 0.8) 100%);
+          box-shadow: 0 0 0 2px hsl(48 96% 53% / 0.3);
         }
       `}</style>
 
