@@ -37,6 +37,8 @@ export default function ExplorePage() {
   const [featuredArticle, setFeaturedArticle] = useState<WikiArticle | null>(null);
   const [randomArticles, setRandomArticles] = useState<WikiSearchResult[]>(fallbackTopics);
   const [isLoading, setIsLoading] = useState(true);
+  const [visibleTrending, setVisibleTrending] = useState(8);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { recentArticles, notes, highlights } = useStore();
   const navigate = useNavigate();
 
@@ -69,6 +71,14 @@ export default function ExplorePage() {
 
   const handleCategoryClick = (category: string) => {
     navigate(`/article/${encodeURIComponent(category)}`);
+  };
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    setTimeout(() => {
+      setVisibleTrending(prev => Math.min(prev + 8, trendingArticles.length));
+      setLoadingMore(false);
+    }, 500);
   };
 
   const containerVariants = {
@@ -353,16 +363,54 @@ export default function ExplorePage() {
                 viewport={{ once: true }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
               >
-                {trendingArticles.slice(0, 8).map((article, index) => (
-                  <motion.div key={article.pageid} variants={itemVariants}>
-                    <TopicCard
-                      article={article}
-                      index={index}
-                      size={index === 0 || index === 3 ? 'lg' : 'md'}
-                    />
-                  </motion.div>
-                ))}
+                <AnimatePresence>
+                  {trendingArticles.slice(0, visibleTrending).map((article, index) => (
+                    <motion.div 
+                      key={article.pageid} 
+                      variants={itemVariants}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index >= visibleTrending - 8 ? (index % 8) * 0.1 : 0 }}
+                    >
+                      <TopicCard
+                        article={article}
+                        index={index}
+                        size={index === 0 || index === 3 ? 'lg' : 'md'}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </motion.div>
+
+              {/* Load More Button */}
+              {visibleTrending < trendingArticles.length && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-center mt-10"
+                >
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    size="lg"
+                    className="group relative px-8 py-6 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 border border-primary/30 hover:border-primary/50 text-foreground font-medium transition-all duration-300"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <span>Load More Articles</span>
+                        <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/20 text-xs">
+                          {trendingArticles.length - visibleTrending} more
+                        </span>
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              )}
             </div>
           </section>
         )}
