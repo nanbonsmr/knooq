@@ -13,6 +13,14 @@ export interface Note {
   updatedAt: Date;
 }
 
+export interface Highlight {
+  id: string;
+  articleId: string;
+  text: string;
+  color: string;
+  createdAt: Date;
+}
+
 export interface ArticleState {
   title: string;
   pageid: number;
@@ -39,6 +47,12 @@ interface StoreState {
   addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateNote: (id: string, content: Partial<Note>) => void;
   deleteNote: (id: string) => void;
+
+  // Highlights
+  highlights: Highlight[];
+  addHighlight: (highlight: Omit<Highlight, 'id' | 'createdAt'>) => void;
+  removeHighlight: (id: string) => void;
+  getHighlightsForArticle: (articleId: string) => Highlight[];
 
   // UI State
   isNotePanelOpen: boolean;
@@ -99,6 +113,26 @@ export const useStore = create<StoreState>()(
           notes: state.notes.filter((note) => note.id !== id),
         })),
 
+      // Highlights
+      highlights: [],
+      addHighlight: (highlight) =>
+        set((state) => ({
+          highlights: [
+            ...state.highlights,
+            {
+              ...highlight,
+              id: crypto.randomUUID(),
+              createdAt: new Date(),
+            },
+          ],
+        })),
+      removeHighlight: (id) =>
+        set((state) => ({
+          highlights: state.highlights.filter((h) => h.id !== id),
+        })),
+      getHighlightsForArticle: (articleId) =>
+        get().highlights.filter((h) => h.articleId === articleId),
+
       // UI State
       isNotePanelOpen: false,
       setNotePanelOpen: (isOpen) => set({ isNotePanelOpen: isOpen }),
@@ -133,6 +167,7 @@ export const useStore = create<StoreState>()(
       name: 'knooq-knowledge-store',
       partialize: (state) => ({
         notes: state.notes,
+        highlights: state.highlights,
         recentArticles: state.recentArticles,
         bookmarks: state.bookmarks,
       }),
