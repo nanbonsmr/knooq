@@ -50,12 +50,8 @@ export default function Header() {
                 ))}
               </nav>
 
-              {/* Mobile Menu Button + Status */}
+              {/* Mobile Menu Button */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  <span className="text-xs text-muted-foreground hidden sm:inline">Connected</span>
-                </div>
                 
                 {/* Hamburger Button */}
                 <button
