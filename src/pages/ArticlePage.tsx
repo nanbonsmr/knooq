@@ -14,7 +14,8 @@ import {
   BookOpen,
   Network,
   X,
-  Trash2
+  Trash2,
+  Highlighter
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
@@ -22,6 +23,7 @@ import StudyWorkspace from '@/components/StudyWorkspace';
 import ImageLightbox from '@/components/ImageLightbox';
 import TableOfContents from '@/components/TableOfContents';
 import TextSelectionTooltip from '@/components/TextSelectionTooltip';
+import HighlightsPanel from '@/components/HighlightsPanel';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -62,6 +64,12 @@ export default function ArticlePage() {
   const bookmarked = article ? isBookmarked(article.pageid) : false;
   const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
   const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [isHighlightsPanelOpen, setIsHighlightsPanelOpen] = useState(false);
+
+  // Get article highlights count
+  const articleHighlightsCount = article 
+    ? highlights.filter(h => h.articleId === String(article.pageid)).length
+    : 0;
 
   useEffect(() => {
     async function fetchArticle() {
@@ -275,6 +283,22 @@ export default function ArticlePage() {
     }
   }, [activeHighlightId, removeHighlight]);
 
+  // Navigate to a specific highlight in the article
+  const handleNavigateToHighlight = useCallback((highlightId: string) => {
+    const container = articleContentRef.current;
+    if (container) {
+      const highlightEl = container.querySelector(`[data-highlight-id="${highlightId}"]`);
+      if (highlightEl) {
+        highlightEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Flash animation
+        highlightEl.classList.add('highlight-flash');
+        setTimeout(() => {
+          highlightEl.classList.remove('highlight-flash');
+        }, 2000);
+      }
+    }
+  }, []);
+
   // Attach click listener to article content for images and highlights
   useEffect(() => {
     const container = articleContentRef.current;
@@ -333,14 +357,29 @@ export default function ArticlePage() {
             )}
           </Button>
           {!isStudyMode && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setNotePanelOpen(!isNotePanelOpen)}
-              className="rounded-full"
-            >
-              <StickyNote className={`w-5 h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsHighlightsPanelOpen(!isHighlightsPanelOpen)}
+                className="rounded-full relative"
+              >
+                <Highlighter className={`w-5 h-5 ${isHighlightsPanelOpen ? 'text-yellow-500' : ''}`} />
+                {articleHighlightsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 text-background text-xs rounded-full flex items-center justify-center font-medium">
+                    {articleHighlightsCount}
+                  </span>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setNotePanelOpen(!isNotePanelOpen)}
+                className="rounded-full"
+              >
+                <StickyNote className={`w-5 h-5 ${isNotePanelOpen ? 'text-primary' : ''}`} />
+              </Button>
+            </>
           )}
           <Button
             variant="ghost"
@@ -465,6 +504,16 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-background">
       <Header />
       {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
+      
+      {/* Highlights Panel */}
+      {!isStudyMode && (
+        <HighlightsPanel
+          articleId={String(article?.pageid)}
+          isOpen={isHighlightsPanelOpen}
+          onClose={() => setIsHighlightsPanelOpen(false)}
+          onNavigateToHighlight={handleNavigateToHighlight}
+        />
+      )}
 
       {/* Text Selection Tooltip */}
       <TextSelectionTooltip
@@ -776,6 +825,23 @@ export default function ArticlePage() {
         .wiki-content .highlight-marker:hover {
           background: linear-gradient(120deg, hsl(48 96% 53% / 0.6) 0%, hsl(48 96% 53% / 0.8) 100%);
           box-shadow: 0 0 0 2px hsl(48 96% 53% / 0.3);
+        }
+        .wiki-content .highlight-marker.highlight-flash {
+          animation: highlight-pulse 2s ease-out;
+        }
+        @keyframes highlight-pulse {
+          0%, 100% {
+            background: linear-gradient(120deg, hsl(48 96% 53% / 0.4) 0%, hsl(48 96% 53% / 0.6) 100%);
+            box-shadow: 0 0 0 0 hsl(48 96% 53% / 0);
+          }
+          25%, 75% {
+            background: linear-gradient(120deg, hsl(48 96% 53% / 0.8) 0%, hsl(48 96% 53% / 1) 100%);
+            box-shadow: 0 0 20px 4px hsl(48 96% 53% / 0.5);
+          }
+          50% {
+            background: linear-gradient(120deg, hsl(48 96% 53% / 0.6) 0%, hsl(48 96% 53% / 0.8) 100%);
+            box-shadow: 0 0 10px 2px hsl(48 96% 53% / 0.3);
+          }
         }
       `}</style>
 
