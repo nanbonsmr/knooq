@@ -253,6 +253,19 @@ export default function ArticlePage() {
     }
   }, []);
 
+  // Handle internal link navigation
+  const handleLinkClick = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest('a[data-internal-link="true"]');
+    if (link) {
+      e.preventDefault();
+      const href = link.getAttribute('href');
+      if (href) {
+        navigate(href);
+      }
+    }
+  }, [navigate]);
+
   // Handle highlight click for deletion
   const handleHighlightClick = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -299,18 +312,20 @@ export default function ArticlePage() {
     }
   }, []);
 
-  // Attach click listener to article content for images and highlights
+  // Attach click listener to article content for images, highlights, and links
   useEffect(() => {
     const container = articleContentRef.current;
     if (container) {
       container.addEventListener('click', handleImageClick);
       container.addEventListener('click', handleHighlightClick);
+      container.addEventListener('click', handleLinkClick);
       return () => {
         container.removeEventListener('click', handleImageClick);
         container.removeEventListener('click', handleHighlightClick);
+        container.removeEventListener('click', handleLinkClick);
       };
     }
-  }, [handleImageClick, handleHighlightClick, htmlContent]);
+  }, [handleImageClick, handleHighlightClick, handleLinkClick, htmlContent]);
 
   const ArticleContent = () => (
     <div className={`h-full overflow-auto ${isStudyMode ? 'pt-4 px-6' : 'container mx-auto px-6 pt-24 pb-20'}`}>
@@ -896,17 +911,42 @@ function processWikiContent(html: string): string {
     img.setAttribute('loading', 'lazy');
   });
 
-  // Fix all links to be absolute
+  // Convert Wikipedia links to internal app navigation
   doc.querySelectorAll('a').forEach((link) => {
     const href = link.getAttribute('href');
     if (href && href.startsWith('/wiki/')) {
-      link.setAttribute('href', 'https://en.wikipedia.org' + href);
-      link.setAttribute('target', '_blank');
-      link.setAttribute('rel', 'noopener noreferrer');
+      // Extract article title from /wiki/Article_Name
+      const articleTitle = href.replace('/wiki/', '');
+      // Skip special pages and file links
+      if (!articleTitle.includes(':')) {
+        link.setAttribute('href', `/article/${articleTitle}`);
+        link.setAttribute('data-internal-link', 'true');
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+      } else {
+        // For special pages, open externally
+        link.setAttribute('href', 'https://en.wikipedia.org' + href);
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
     } else if (href && href.startsWith('./')) {
-      link.setAttribute('href', 'https://en.wikipedia.org/wiki/' + href.slice(2));
-      link.setAttribute('target', '_blank');
-      link.setAttribute('rel', 'noopener noreferrer');
+      const articleTitle = href.slice(2);
+      if (!articleTitle.includes(':')) {
+        link.setAttribute('href', `/article/${articleTitle}`);
+        link.setAttribute('data-internal-link', 'true');
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+      } else {
+        link.setAttribute('href', 'https://en.wikipedia.org/wiki/' + articleTitle);
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    } else if (href && href.startsWith('#')) {
+      // Keep anchor links as is
+    } else if (href && !href.startsWith('http')) {
+      // Other relative links, make them internal
+      link.setAttribute('href', `/article/${href}`);
+      link.setAttribute('data-internal-link', 'true');
     }
   });
 
