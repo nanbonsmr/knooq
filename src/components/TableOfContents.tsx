@@ -19,63 +19,56 @@ export default function TableOfContents({ contentRef, htmlContent }: TableOfCont
   const [activeId, setActiveId] = useState<string>('');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Extract headings from content
+  // Extract headings from content and add IDs to actual DOM
   useEffect(() => {
     if (!htmlContent) return;
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, 'text/html');
-    const headingElements = doc.querySelectorAll('h2, h3, h4');
-    
-    const items: TOCItem[] = [];
-    headingElements.forEach((heading, index) => {
-      const text = heading.textContent?.trim() || '';
-      if (text && text.length > 0 && !text.toLowerCase().includes('reference') && !text.toLowerCase().includes('see also')) {
-        const id = `toc-heading-${index}`;
-        items.push({
-          id,
-          text: text.slice(0, 50) + (text.length > 50 ? '...' : ''),
-          level: parseInt(heading.tagName[1]),
-        });
-      }
-    });
-    
-    setHeadings(items);
+    // Wait for DOM to be ready
+    const timeout = setTimeout(() => {
+      // Find the wiki-content container in the document
+      const wikiContent = document.querySelector('.wiki-content');
+      if (!wikiContent) return;
+
+      const headingElements = wikiContent.querySelectorAll('h2, h3, h4');
+      
+      const items: TOCItem[] = [];
+      let tocIndex = 0;
+      
+      headingElements.forEach((heading) => {
+        const text = heading.textContent?.trim() || '';
+        if (text && text.length > 0 && 
+            !text.toLowerCase().includes('reference') && 
+            !text.toLowerCase().includes('see also') &&
+            !text.toLowerCase().includes('external links') &&
+            !text.toLowerCase().includes('further reading')) {
+          const id = `toc-heading-${tocIndex}`;
+          heading.id = id;
+          items.push({
+            id,
+            text: text.slice(0, 50) + (text.length > 50 ? '...' : ''),
+            level: parseInt(heading.tagName[1]),
+          });
+          tocIndex++;
+        }
+      });
+      
+      setHeadings(items);
+    }, 500);
+
+    return () => clearTimeout(timeout);
   }, [htmlContent]);
-
-  // Add IDs to headings in the actual DOM
-  useEffect(() => {
-    if (!contentRef.current || headings.length === 0) return;
-
-    const container = contentRef.current;
-    const headingElements = container.querySelectorAll('h2, h3, h4');
-    
-    let tocIndex = 0;
-    headingElements.forEach((heading) => {
-      const text = heading.textContent?.trim() || '';
-      if (text && !text.toLowerCase().includes('reference') && !text.toLowerCase().includes('see also')) {
-        heading.id = `toc-heading-${tocIndex}`;
-        tocIndex++;
-      }
-    });
-  }, [contentRef, headings, htmlContent]);
 
   // Track scroll position
   const handleScroll = useCallback(() => {
-    if (!contentRef.current) return;
+    const wikiContent = document.querySelector('.wiki-content');
+    if (!wikiContent) return;
 
-    const container = contentRef.current;
-    const scrollTop = container.scrollTop;
-    const containerRect = container.getBoundingClientRect();
-
-    const headingElements = container.querySelectorAll('h2[id^="toc-"], h3[id^="toc-"], h4[id^="toc-"]');
+    const headingElements = wikiContent.querySelectorAll('h2[id^="toc-"], h3[id^="toc-"], h4[id^="toc-"]');
     
     let currentId = '';
     headingElements.forEach((heading) => {
       const rect = heading.getBoundingClientRect();
-      const relativeTop = rect.top - containerRect.top;
-      
-      if (relativeTop <= 100) {
+      if (rect.top <= 150) {
         currentId = heading.id;
       }
     });
@@ -83,22 +76,18 @@ export default function TableOfContents({ contentRef, htmlContent }: TableOfCont
     if (currentId) {
       setActiveId(currentId);
     }
-  }, [contentRef]);
+  }, []);
 
   useEffect(() => {
-    const container = contentRef.current;
-    if (!container) return;
+    // Listen to scroll on window and any scrollable container
+    window.addEventListener('scroll', handleScroll, true);
+    handleScroll();
 
-    container.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [contentRef, handleScroll, htmlContent]);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, [handleScroll, htmlContent, headings]);
 
   const scrollToHeading = (id: string) => {
-    if (!contentRef.current) return;
-
-    const heading = contentRef.current.querySelector(`#${id}`);
+    const heading = document.getElementById(id);
     if (heading) {
       heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveId(id);
