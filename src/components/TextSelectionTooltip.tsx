@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Highlighter, StickyNote } from 'lucide-react';
+import { Highlighter, StickyNote, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TextSelectionTooltipProps {
   containerRef: React.RefObject<HTMLElement>;
   onHighlight: (text: string) => void;
   onAddNote: (text: string) => void;
+  onAISuggest?: (text: string) => void;
 }
 
 export default function TextSelectionTooltip({
   containerRef,
   onHighlight,
   onAddNote,
+  onAISuggest,
 }: TextSelectionTooltipProps) {
   const [selectedText, setSelectedText] = useState('');
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
@@ -134,6 +136,14 @@ export default function TextSelectionTooltip({
     }
   };
 
+  const handleAISuggest = () => {
+    if (selectedText && onAISuggest) {
+      onAISuggest(selectedText);
+      setIsVisible(false);
+      window.getSelection()?.removeAllRanges();
+    }
+  };
+
   return (
     <AnimatePresence>
       {isVisible && position && (
@@ -169,6 +179,20 @@ export default function TextSelectionTooltip({
             <StickyNote className="w-4 h-4" />
             Add Note
           </Button>
+          {onAISuggest && (
+            <>
+              <div className="w-px h-5 bg-border/50" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAISuggest}
+                className="h-8 px-3 gap-2 text-sm hover:bg-violet-500/20 hover:text-violet-500 rounded-lg"
+              >
+                <Sparkles className="w-4 h-4" />
+                AI Notes
+              </Button>
+            </>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
