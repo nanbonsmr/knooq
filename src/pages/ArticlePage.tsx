@@ -25,6 +25,9 @@ import TableOfContents from '@/components/TableOfContents';
 import TextSelectionTooltip from '@/components/TextSelectionTooltip';
 import HighlightsPanel from '@/components/HighlightsPanel';
 import ArticleBreadcrumbs from '@/components/ArticleBreadcrumbs';
+import AISummary from '@/components/AISummary';
+import AIChatAssistant from '@/components/AIChatAssistant';
+import AINoteSuggestions from '@/components/AINoteSuggestions';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -67,6 +70,7 @@ export default function ArticlePage() {
   const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
   const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [isHighlightsPanelOpen, setIsHighlightsPanelOpen] = useState(false);
+  const [aiSuggestText, setAiSuggestText] = useState<string | null>(null);
 
   // Get article highlights count
   const articleHighlightsCount = article 
@@ -477,6 +481,13 @@ export default function ArticlePage() {
               )}
             </div>
 
+            {/* AI Summary */}
+            {!isStudyMode && (
+              <div className="mb-6">
+                <AISummary title={article.title} content={article.extract + '\n\n' + htmlContent} />
+              </div>
+            )}
+
             {/* Summary card */}
             <div className="glass-card rounded-2xl p-6 mb-8">
               <h2 className="text-lg font-semibold text-primary mb-3">Summary</h2>
@@ -532,6 +543,15 @@ export default function ArticlePage() {
       <Header />
       {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
       
+      {/* AI Chat Assistant */}
+      <AIChatAssistant 
+        articleContext={article ? {
+          title: article.title,
+          content: htmlContent,
+          extract: article.extract,
+        } : null}
+      />
+      
       {/* Highlights Panel */}
       {!isStudyMode && (
         <HighlightsPanel
@@ -547,7 +567,23 @@ export default function ArticlePage() {
         containerRef={articleContentRef}
         onHighlight={handleHighlight}
         onAddNote={handleAddNoteFromSelection}
+        onAISuggest={(text) => setAiSuggestText(text)}
       />
+
+      {/* AI Note Suggestions Modal */}
+      {aiSuggestText && article && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
+          <div className="w-full max-w-md">
+            <AINoteSuggestions
+              highlightedText={aiSuggestText}
+              articleTitle={article.title}
+              articleId={String(article.pageid)}
+              articleContent={htmlContent}
+              onClose={() => setAiSuggestText(null)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Highlight Delete Tooltip */}
       <AnimatePresence>
