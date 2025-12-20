@@ -9,8 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const PADDLE_PRICES = {
-  monthly: 'pri_01kcxj4vd594cgxt6w1tc34ewe',
-  yearly: 'pri_01kcxj16zv07mwtkxxqx9n4bgq',
+  monthly: 'pri_01kcxr069v4z5xwt448kve6arz',
+  yearly: 'pri_01kcxr12246ykwx4n2m4qz25yx',
 };
 
 export default function PricingPage() {
