@@ -97,17 +97,14 @@ export default function Header() {
                         )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
-                              <Avatar className="w-6 h-6 xl:w-7 xl:h-7">
+                            <button className="flex items-center gap-1 px-1.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
+                              <Avatar className="w-7 h-7 xl:w-8 xl:h-8">
                                 <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
                                 <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
                                   {getUserInitials()}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="text-xs xl:text-sm text-muted-foreground truncate max-w-20 xl:max-w-32 hidden sm:block">
-                                {user.email}
-                              </span>
-                              <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4 text-muted-foreground" />
+                              <ChevronDown className="w-3 h-3 text-muted-foreground" />
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-lg z-50">
