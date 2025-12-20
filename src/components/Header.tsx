@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 
@@ -10,6 +11,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
+  const { isPro } = useSubscription();
   const isHome = location.pathname === '/';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -22,6 +24,7 @@ export default function Header() {
     { to: '/', icon: <Compass className="w-5 h-5" />, label: 'Explore', active: isHome },
     { to: '/bookmarks', icon: <BookMarked className="w-5 h-5" />, label: 'Bookmarks', active: location.pathname === '/bookmarks' },
     { to: '/notes', icon: <BookOpen className="w-5 h-5" />, label: 'Notes', active: location.pathname === '/notes' },
+    { to: '/pricing', icon: <Crown className="w-5 h-5" />, label: 'Pricing', active: location.pathname === '/pricing' },
   ];
 
   return (
@@ -63,6 +66,20 @@ export default function Header() {
                   <>
                     {user ? (
                       <div className="flex items-center gap-2 ml-4">
+                        {isPro && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                            <Crown className="w-3 h-3" />
+                            Pro
+                          </span>
+                        )}
+                        {!isPro && (
+                          <Link to="/pricing">
+                            <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10">
+                              <Crown className="w-4 h-4 mr-1" />
+                              Upgrade
+                            </Button>
+                          </Link>
+                        )}
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50">
                           <User className="w-4 h-4 text-primary" />
                           <span className="text-sm text-muted-foreground truncate max-w-32">

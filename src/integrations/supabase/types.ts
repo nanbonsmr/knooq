@@ -14,16 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      highlights: {
+        Row: {
+          article_title: string
+          color: string | null
+          created_at: string
+          id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          article_title: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          article_title?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          article_title: string
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          article_title: string
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          article_title?: string
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          paddle_customer_id: string | null
+          paddle_subscription_id: string | null
+          plan_type: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
+          plan_type?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
+          plan_type?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_pro_user: { Args: { check_user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      subscription_status:
+        | "active"
+        | "cancelled"
+        | "past_due"
+        | "paused"
+        | "trialing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +247,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_status: [
+        "active",
+        "cancelled",
+        "past_due",
+        "paused",
+        "trialing",
+      ],
+    },
   },
 } as const

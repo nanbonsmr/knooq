@@ -28,6 +28,8 @@ import ArticleBreadcrumbs from '@/components/ArticleBreadcrumbs';
 import AISummary from '@/components/AISummary';
 import AIChatAssistant from '@/components/AIChatAssistant';
 import AINoteSuggestions from '@/components/AINoteSuggestions';
+import { ProGate, ProBadge } from '@/components/ProGate';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -66,6 +68,7 @@ export default function ArticlePage() {
     addBreadcrumb
   } = useStore();
 
+  const { isPro } = useSubscription();
   const bookmarked = article ? isBookmarked(article.pageid) : false;
   const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
   const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -481,10 +484,19 @@ export default function ArticlePage() {
               )}
             </div>
 
-            {/* AI Summary */}
+            {/* AI Summary - Pro Only */}
             {!isStudyMode && (
               <div className="mb-6">
-                <AISummary title={article.title} content={article.extract + '\n\n' + htmlContent} />
+                <ProGate featureName="AI summaries" fallback={
+                  <div className="glass-card rounded-2xl p-4 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ProBadge />
+                      <span className="text-sm text-muted-foreground">AI Summary available for Pro users</span>
+                    </div>
+                  </div>
+                }>
+                  <AISummary title={article.title} content={article.extract + '\n\n' + htmlContent} />
+                </ProGate>
               </div>
             )}
 
@@ -543,14 +555,16 @@ export default function ArticlePage() {
       <Header />
       {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
       
-      {/* AI Chat Assistant */}
-      <AIChatAssistant 
-        articleContext={article ? {
-          title: article.title,
-          content: htmlContent,
-          extract: article.extract,
-        } : null}
-      />
+      {/* AI Chat Assistant - Pro Only */}
+      {isPro && (
+        <AIChatAssistant 
+          articleContext={article ? {
+            title: article.title,
+            content: htmlContent,
+            extract: article.extract,
+          } : null}
+        />
+      )}
       
       {/* Highlights Panel */}
       {!isStudyMode && (
@@ -570,8 +584,8 @@ export default function ArticlePage() {
         onAISuggest={(text) => setAiSuggestText(text)}
       />
 
-      {/* AI Note Suggestions Modal */}
-      {aiSuggestText && article && (
+      {/* AI Note Suggestions Modal - Pro Only */}
+      {aiSuggestText && article && isPro && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
           <div className="w-full max-w-md">
             <AINoteSuggestions
@@ -585,7 +599,14 @@ export default function ArticlePage() {
         </div>
       )}
 
-      {/* Highlight Delete Tooltip */}
+      {/* AI Note Suggestions - Non-Pro Fallback */}
+      {aiSuggestText && article && !isPro && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm" onClick={() => setAiSuggestText(null)}>
+          <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <ProGate featureName="AI note suggestions" />
+          </div>
+        </div>
+      )}
       <AnimatePresence>
         {activeHighlightId && highlightTooltipPos && (
           <motion.div
