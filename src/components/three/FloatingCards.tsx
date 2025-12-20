@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Text, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
@@ -26,17 +26,17 @@ function TopicCard({ position, title, color, onClick, delay = 0 }: TopicCardProp
 
   return (
     <Float
-      speed={2}
-      rotationIntensity={0.3}
-      floatIntensity={0.5}
-      floatingRange={[-0.2, 0.2]}
+      speed={1.5}
+      rotationIntensity={0.2}
+      floatIntensity={0.3}
+      floatingRange={[-0.1, 0.1]}
     >
       <group position={position} onClick={onClick}>
         <RoundedBox
           ref={meshRef}
           args={[2.5, 1.5, 0.15]}
           radius={0.1}
-          smoothness={4}
+          smoothness={2}
         >
           <meshStandardMaterial
             ref={materialRef}
@@ -67,8 +67,8 @@ function ParticleField() {
   const particlesRef = useRef<THREE.Points>(null);
   
   const particles = useMemo(() => {
-    const positions = new Float32Array(200 * 3);
-    for (let i = 0; i < 200; i++) {
+    const positions = new Float32Array(100 * 3);
+    for (let i = 0; i < 100; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
@@ -78,8 +78,7 @@ function ParticleField() {
 
   useFrame((state) => {
     if (particlesRef.current) {
-      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-      particlesRef.current.rotation.x = state.clock.elapsedTime * 0.01;
+      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.01;
     }
   });
 
@@ -88,7 +87,7 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={200}
+          count={100}
           array={particles}
           itemSize={3}
         />
@@ -128,11 +127,10 @@ function Scene({ articles, onCardClick }: FloatingCardsSceneProps) {
       <ambientLight intensity={0.4} />
       <pointLight position={[10, 10, 10]} intensity={0.8} color="#8b5cf6" />
       <pointLight position={[-10, -10, -10]} intensity={0.4} color="#06b6d4" />
-      <spotLight position={[0, 10, 0]} intensity={0.5} angle={0.3} penumbra={1} />
       
       <ParticleField />
       
-      {articles.slice(0, 8).map((article, index) => (
+      {articles.slice(0, 6).map((article, index) => (
         <TopicCard
           key={article.pageid}
           position={positions[index % positions.length]}
@@ -147,15 +145,43 @@ function Scene({ articles, onCardClick }: FloatingCardsSceneProps) {
 }
 
 export default function FloatingCards({ articles, onCardClick }: FloatingCardsSceneProps) {
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="absolute inset-0 -z-10">
-      <Canvas
-        camera={{ position: [0, 0, 8], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: 'transparent' }}
-      >
-        <Scene articles={articles} onCardClick={onCardClick} />
-      </Canvas>
+    <div ref={containerRef} className="absolute inset-0 -z-10 pointer-events-none">
+      {isVisible && (
+        <Canvas
+          camera={{ position: [0, 0, 8], fov: 60 }}
+          gl={{ 
+            antialias: false, 
+            alpha: true,
+            powerPreference: 'low-power',
+            stencil: false,
+            depth: true
+          }}
+          dpr={[1, 1.5]}
+          frameloop="demand"
+          style={{ background: 'transparent', pointerEvents: 'none' }}
+        >
+          <Scene articles={articles} onCardClick={onCardClick} />
+        </Canvas>
+      )}
     </div>
   );
 }
