@@ -38,7 +38,6 @@ export default function Header() {
     { to: '/', icon: <Compass className="w-5 h-5" />, label: 'Explore', active: isHome },
     { to: '/bookmarks', icon: <BookMarked className="w-5 h-5" />, label: 'Bookmarks', active: location.pathname === '/bookmarks' },
     { to: '/notes', icon: <BookOpen className="w-5 h-5" />, label: 'Notes', active: location.pathname === '/notes' },
-    { to: '/pricing', icon: <Crown className="w-5 h-5" />, label: 'Pricing', active: location.pathname === '/pricing' },
   ];
 
   return (
