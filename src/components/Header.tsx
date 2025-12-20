@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut, loading } = useAuth();
   const isHome = location.pathname === '/';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMobileMenuOpen(false);
+  };
 
   const navItems = [
     { to: '/', icon: <Compass className="w-5 h-5" />, label: 'Explore', active: isHome },
@@ -48,6 +57,41 @@ export default function Header() {
                     {item.label}
                   </NavLink>
                 ))}
+                
+                {/* Auth Button */}
+                {!loading && (
+                  <>
+                    {user ? (
+                      <div className="flex items-center gap-2 ml-4">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50">
+                          <User className="w-4 h-4 text-primary" />
+                          <span className="text-sm text-muted-foreground truncate max-w-32">
+                            {user.email}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleSignOut}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign out
+                        </Button>
+                      </div>
+                    ) : (
+                      <Link to="/auth" className="ml-4">
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                        >
+                          <LogIn className="w-4 h-4 mr-2" />
+                          Sign in
+                        </Button>
+                      </Link>
+                    )}
+                  </>
+                )}
               </nav>
 
               {/* Mobile Menu Button */}
@@ -131,6 +175,39 @@ export default function Header() {
                     ))}
                   </div>
                 </nav>
+
+                {/* Auth Section */}
+                <div className="p-4 border-t border-border/30">
+                  {!loading && (
+                    <>
+                      {user ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50">
+                            <User className="w-4 h-4 text-primary" />
+                            <span className="text-sm text-muted-foreground truncate">
+                              {user.email}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            onClick={handleSignOut}
+                            className="w-full justify-start text-muted-foreground hover:text-foreground"
+                          >
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Sign out
+                          </Button>
+                        </div>
+                      ) : (
+                        <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                            <LogIn className="w-4 h-4 mr-2" />
+                            Sign in
+                          </Button>
+                        </Link>
+                      )}
+                    </>
+                  )}
+                </div>
 
                 {/* Footer */}
                 <div className="p-6 border-t border-border/30">
