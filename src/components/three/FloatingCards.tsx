@@ -13,7 +13,6 @@ interface TopicCardProps {
 
 function TopicCard({ position, title, color, onClick, delay = 0 }: TopicCardProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -38,13 +37,10 @@ function TopicCard({ position, title, color, onClick, delay = 0 }: TopicCardProp
           radius={0.1}
           smoothness={2}
         >
-          <meshStandardMaterial
-            ref={materialRef}
+          <meshBasicMaterial
             color={gradientColor}
             transparent
             opacity={0.85}
-            metalness={0.2}
-            roughness={0.3}
           />
         </RoundedBox>
         <Text
@@ -168,14 +164,15 @@ export default function FloatingCards({ articles, onCardClick }: FloatingCardsSc
       {isVisible && (
         <Canvas
           camera={{ position: [0, 0, 8], fov: 60 }}
+          shadows={false}
           gl={{ 
             antialias: false, 
             alpha: true,
             powerPreference: 'low-power',
             stencil: false,
-            depth: true
+            depth: false
           }}
-          dpr={[1, 1.5]}
+          dpr={1}
           frameloop="demand"
           style={{ background: 'transparent', pointerEvents: 'none' }}
         >
