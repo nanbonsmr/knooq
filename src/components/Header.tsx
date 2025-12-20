@@ -5,6 +5,7 @@ import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, Lay
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,12 @@ export default function Header() {
   const { isPro } = useSubscription();
   const isHome = location.pathname === '/';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.email) return 'U';
+    return user.email.charAt(0).toUpperCase();
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -91,15 +98,36 @@ export default function Header() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
-                              <User className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-primary" />
-                              <span className="text-xs xl:text-sm text-muted-foreground truncate max-w-20 xl:max-w-32">
+                              <Avatar className="w-6 h-6 xl:w-7 xl:h-7">
+                                <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
+                                <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
+                                  {getUserInitials()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs xl:text-sm text-muted-foreground truncate max-w-20 xl:max-w-32 hidden sm:block">
                                 {user.email}
                               </span>
                               <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4 text-muted-foreground" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg z-50">
-                            <DropdownMenuItem asChild>
+                          <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-lg z-50">
+                            <div className="flex items-center gap-3 px-2 py-3 border-b border-border">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
+                                <AvatarFallback className="bg-primary/20 text-primary font-medium">
+                                  {getUserInitials()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-medium text-foreground truncate">
+                                  {user.user_metadata?.full_name || 'User'}
+                                </span>
+                                <span className="text-xs text-muted-foreground truncate">
+                                  {user.email}
+                                </span>
+                              </div>
+                            </div>
+                            <DropdownMenuItem asChild className="mt-1">
                               <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
                                 <LayoutDashboard className="w-4 h-4" />
                                 Dashboard
