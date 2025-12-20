@@ -22,10 +22,16 @@ serve(async (req) => {
       throw new Error("priceId and userId are required");
     }
 
-    console.log("Creating Paddle checkout for:", { priceId, userId, userEmail });
+    // Detect sandbox vs production based on API key prefix
+    const isSandbox = paddleApiKey.startsWith("test_");
+    const baseUrl = isSandbox 
+      ? "https://sandbox-api.paddle.com" 
+      : "https://api.paddle.com";
+
+    console.log("Creating Paddle checkout for:", { priceId, userId, userEmail, isSandbox });
 
     // Create a transaction using Paddle API
-    const response = await fetch("https://api.paddle.com/transactions", {
+    const response = await fetch(`${baseUrl}/transactions`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${paddleApiKey}`,
