@@ -8,10 +8,9 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Replace these with your actual Paddle price IDs
 const PADDLE_PRICES = {
-  monthly: 'pri_YOUR_MONTHLY_PRICE_ID',
-  yearly: 'pri_YOUR_YEARLY_PRICE_ID',
+  monthly: 'pri_01kcxj4vd594cgxt6w1tc34ewe',
+  yearly: 'pri_01kcxj16zv07mwtkxxqx9n4bgq',
 };
 
 export default function PricingPage() {
