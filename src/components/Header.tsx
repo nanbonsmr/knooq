@@ -79,12 +79,6 @@ export default function Header() {
                   <>
                     {user ? (
                       <div className="flex items-center gap-1.5 xl:gap-2 ml-2 xl:ml-4">
-                        {isPro && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                            <Crown className="w-3 h-3" />
-                            Pro
-                          </span>
-                        )}
                         {!isPro && (
                           <Link to="/pricing">
                             <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 text-xs xl:text-sm px-2 xl:px-3">
@@ -96,13 +90,20 @@ export default function Header() {
                         )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-1 px-1.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
-                              <Avatar className="w-7 h-7 xl:w-8 xl:h-8">
-                                <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
-                                <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
-                                  {getUserInitials()}
-                                </AvatarFallback>
-                              </Avatar>
+                            <button className="relative flex items-center gap-1 px-1.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
+                              <div className="relative">
+                                <Avatar className="w-7 h-7 xl:w-8 xl:h-8">
+                                  <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
+                                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
+                                    {getUserInitials()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {isPro && (
+                                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full bg-gradient-to-r from-primary to-accent shadow-lg">
+                                    <Crown className="w-2.5 h-2.5 text-primary-foreground" />
+                                  </span>
+                                )}
+                              </div>
                               <ChevronDown className="w-3 h-3 text-muted-foreground" />
                             </button>
                           </DropdownMenuTrigger>
