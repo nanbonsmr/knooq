@@ -7,6 +7,8 @@ interface Subscription {
   status: string;
   plan_type: string;
   current_period_end: string | null;
+  paddle_subscription_id: string | null;
+  paddle_customer_id: string | null;
 }
 
 interface SubscriptionContextType {

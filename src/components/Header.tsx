@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
@@ -80,12 +80,12 @@ export default function Header() {
                             </Button>
                           </Link>
                         )}
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50">
+                        <Link to="/dashboard" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
                           <User className="w-4 h-4 text-primary" />
                           <span className="text-sm text-muted-foreground truncate max-w-32">
                             {user.email}
                           </span>
-                        </div>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="sm"
