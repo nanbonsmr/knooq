@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import logo from '@/assets/logo.png';
 
 export default function Header() {
@@ -81,21 +88,30 @@ export default function Header() {
                             </Button>
                           </Link>
                         )}
-                        <Link to="/dashboard" className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
-                          <User className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-primary" />
-                          <span className="text-xs xl:text-sm text-muted-foreground truncate max-w-20 xl:max-w-32">
-                            {user.email}
-                          </span>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleSignOut}
-                          className="text-muted-foreground hover:text-foreground text-xs xl:text-sm px-2 xl:px-3"
-                        >
-                          <LogOut className="w-3.5 h-3.5 xl:w-4 xl:h-4 xl:mr-2" />
-                          <span className="hidden xl:inline">Sign out</span>
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
+                              <User className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-primary" />
+                              <span className="text-xs xl:text-sm text-muted-foreground truncate max-w-20 xl:max-w-32">
+                                {user.email}
+                              </span>
+                              <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4 text-muted-foreground" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg z-50">
+                            <DropdownMenuItem asChild>
+                              <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                                <LayoutDashboard className="w-4 h-4" />
+                                Dashboard
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                              <LogOut className="w-4 h-4" />
+                              Sign out
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     ) : (
                       <Link to="/auth" className="ml-2 xl:ml-4">
