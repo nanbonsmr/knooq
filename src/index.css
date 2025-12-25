@@ -164,7 +164,7 @@
     50% { opacity: 0.8; transform: scale(1.1); }
   }
 
-  /* Floating animation */
+  /* Floating animations */
   .float {
     animation: float 6s ease-in-out infinite;
   }
@@ -172,6 +172,40 @@
   @keyframes float {
     0%, 100% { transform: translateY(0) rotateX(0); }
     50% { transform: translateY(-20px) rotateX(2deg); }
+  }
+
+  .animate-float {
+    animation: float-bg 8s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float-bg 8s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .animate-float-slow {
+    animation: float-bg 12s ease-in-out infinite;
+  }
+
+  .animate-float-delayed-slow {
+    animation: float-bg 12s ease-in-out infinite;
+    animation-delay: 4s;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 6s ease-in-out infinite;
+  }
+
+  @keyframes float-bg {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-15px) translateX(10px); }
+    50% { transform: translateY(5px) translateX(-5px); }
+    75% { transform: translateY(-10px) translateX(-10px); }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
   }
 
   /* Shimmer effect */
