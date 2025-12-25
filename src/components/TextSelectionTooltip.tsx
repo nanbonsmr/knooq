@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Highlighter, StickyNote, Sparkles } from 'lucide-react';
+import { Highlighter, StickyNote, Sparkles, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface TextSelectionTooltipProps {
   containerRef: React.RefObject<HTMLElement>;
@@ -19,6 +20,7 @@ export default function TextSelectionTooltip({
   const [selectedText, setSelectedText] = useState('');
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [copied, setCopied] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const updateTooltipPosition = useCallback(() => {
@@ -144,6 +146,19 @@ export default function TextSelectionTooltip({
     }
   };
 
+  const handleCopy = async () => {
+    if (selectedText) {
+      try {
+        await navigator.clipboard.writeText(selectedText);
+        setCopied(true);
+        toast.success('Copied to clipboard');
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        toast.error('Failed to copy');
+      }
+    }
+  };
+
   return (
     <AnimatePresence>
       {isVisible && position && (
@@ -160,6 +175,16 @@ export default function TextSelectionTooltip({
             transform: 'translate(-50%, -100%)',
           }}
         >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            className="h-8 px-3 gap-2 text-sm hover:bg-muted rounded-lg"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copied' : 'Copy'}
+          </Button>
+          <div className="w-px h-5 bg-border/50" />
           <Button
             variant="ghost"
             size="sm"
