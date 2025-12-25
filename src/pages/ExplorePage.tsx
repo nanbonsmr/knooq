@@ -215,6 +215,52 @@ export default function ExplorePage() {
           </motion.div>
         </section>
 
+        {/* Features Section */}
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Everything you need to learn smarter, not harder
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {[
+                { icon: '🎯', title: 'Smart Highlighting', description: 'Highlight important text and organize your learnings with color-coded markers' },
+                { icon: '📝', title: 'Powerful Notes', description: 'Take notes directly on articles and access them anytime from your dashboard' },
+                { icon: '🤖', title: 'AI Assistant', description: 'Get instant summaries, explanations, and answers powered by AI' },
+                { icon: '🔖', title: 'Bookmarks', description: 'Save articles to read later and build your personal knowledge library' },
+                { icon: '📊', title: 'Progress Tracking', description: 'Track your reading history and see your learning journey unfold' },
+                { icon: '🌙', title: 'Dark Mode', description: 'Easy on the eyes with beautiful dark and light themes' },
+              ].map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  variants={itemVariants}
+                  className="group p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300"
+                >
+                  <span className="text-3xl mb-4 block">{feature.icon}</span>
+                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
         {/* Categories Section */}
         <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="max-w-7xl mx-auto">
