@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Sparkles, Zap, Loader2, Globe, ArrowRight, Clock, BookOpen, Star } from 'lucide-react';
 import Header from '@/components/Header';
@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { getTrendingArticles, getFeaturedArticle, getRandomArticles, WikiSearchResult, WikiArticle } from '@/lib/wikipedia';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
-
-const FloatingCards = lazy(() => import('@/components/three/FloatingCards'));
+import AnimatedBackground from '@/components/AnimatedBackground';
 
 // Fallback topics for initial display
 const fallbackTopics: WikiSearchResult[] = [
@@ -117,39 +116,8 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* 3D Background */}
-      <Suspense fallback={null}>
-        {randomArticles.length > 0 && (
-          <FloatingCards articles={randomArticles} onCardClick={handleCardClick} />
-        )}
-      </Suspense>
-
-      {/* Animated gradient orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[150px]"
-        />
-        <motion.div
-          animate={{
-            x: [0, -80, 0],
-            y: [0, 80, 0],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent/15 rounded-full blur-[150px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary/5 to-transparent rounded-full"
-        />
-      </div>
+      {/* CSS-only animated background */}
+      <AnimatedBackground />
 
       <Header />
       <NotePanel />
