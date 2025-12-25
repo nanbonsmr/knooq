@@ -262,41 +262,6 @@ export default function ExplorePage() {
           
         </section>
 
-        {/* Categories Section */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="max-w-7xl mx-auto">
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }} className="text-center mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Explore by Category</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Dive into knowledge across different domains
-              </p>
-            </motion.div>
-
-            <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
-            once: true
-          }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-              {categories.map((category, index) => <motion.button key={category.name} variants={itemVariants} whileHover={{
-              scale: 1.05,
-              y: -5
-            }} whileTap={{
-              scale: 0.98
-            }} onClick={() => handleCategoryClick(category.name)} className="group relative p-4 sm:p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                  <span className="text-2xl sm:text-3xl mb-2 block">{category.icon}</span>
-                  <span className="text-sm sm:text-base font-medium text-foreground">{category.name}</span>
-                </motion.button>)}
-            </motion.div>
-          </div>
-        </section>
-
         {/* Featured Article */}
         <AnimatePresence>
           {featuredArticle && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -359,6 +324,41 @@ export default function ExplorePage() {
               </div>
             </section>}
         </AnimatePresence>
+
+        {/* Categories Section */}
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="max-w-7xl mx-auto">
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Explore by Category</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Dive into knowledge across different domains
+              </p>
+            </motion.div>
+
+            <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+              {categories.map((category, index) => <motion.button key={category.name} variants={itemVariants} whileHover={{
+              scale: 1.05,
+              y: -5
+            }} whileTap={{
+              scale: 0.98
+            }} onClick={() => handleCategoryClick(category.name)} className="group relative p-4 sm:p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <span className="text-2xl sm:text-3xl mb-2 block">{category.icon}</span>
+                  <span className="text-sm sm:text-base font-medium text-foreground">{category.name}</span>
+                </motion.button>)}
+            </motion.div>
+          </div>
+        </section>
 
         {/* Trending Articles */}
         {trendingArticles.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
