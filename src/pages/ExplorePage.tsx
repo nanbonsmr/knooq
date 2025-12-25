@@ -13,24 +13,62 @@ import { useNavigate } from 'react-router-dom';
 import AnimatedBackground from '@/components/AnimatedBackground';
 
 // Fallback topics for initial display
-const fallbackTopics: WikiSearchResult[] = [
-  { pageid: 1, title: 'Quantum Computing', extract: 'Revolutionary computing paradigm using quantum mechanics', description: 'Technology' },
-  { pageid: 2, title: 'Artificial Intelligence', extract: 'Machine intelligence simulating human cognitive functions', description: 'Technology' },
-  { pageid: 3, title: 'Space Exploration', extract: 'The discovery and exploration of outer space', description: 'Science' },
-  { pageid: 4, title: 'Climate Change', extract: 'Long-term shifts in global temperatures and weather patterns', description: 'Environment' },
-  { pageid: 5, title: 'Renaissance', extract: 'A period of cultural, artistic, and intellectual rebirth', description: 'History' },
-  { pageid: 6, title: 'Neuroplasticity', extract: 'The brain\'s ability to reorganize and form new connections', description: 'Science' },
-];
-
-const categories = [
-  { name: 'Science', icon: '🔬', color: 'from-blue-500 to-cyan-400' },
-  { name: 'Technology', icon: '💻', color: 'from-purple-500 to-pink-400' },
-  { name: 'History', icon: '📜', color: 'from-amber-500 to-orange-400' },
-  { name: 'Arts', icon: '🎨', color: 'from-rose-500 to-red-400' },
-  { name: 'Nature', icon: '🌿', color: 'from-green-500 to-emerald-400' },
-  { name: 'Philosophy', icon: '💭', color: 'from-indigo-500 to-violet-400' },
-];
-
+const fallbackTopics: WikiSearchResult[] = [{
+  pageid: 1,
+  title: 'Quantum Computing',
+  extract: 'Revolutionary computing paradigm using quantum mechanics',
+  description: 'Technology'
+}, {
+  pageid: 2,
+  title: 'Artificial Intelligence',
+  extract: 'Machine intelligence simulating human cognitive functions',
+  description: 'Technology'
+}, {
+  pageid: 3,
+  title: 'Space Exploration',
+  extract: 'The discovery and exploration of outer space',
+  description: 'Science'
+}, {
+  pageid: 4,
+  title: 'Climate Change',
+  extract: 'Long-term shifts in global temperatures and weather patterns',
+  description: 'Environment'
+}, {
+  pageid: 5,
+  title: 'Renaissance',
+  extract: 'A period of cultural, artistic, and intellectual rebirth',
+  description: 'History'
+}, {
+  pageid: 6,
+  title: 'Neuroplasticity',
+  extract: 'The brain\'s ability to reorganize and form new connections',
+  description: 'Science'
+}];
+const categories = [{
+  name: 'Science',
+  icon: '🔬',
+  color: 'from-blue-500 to-cyan-400'
+}, {
+  name: 'Technology',
+  icon: '💻',
+  color: 'from-purple-500 to-pink-400'
+}, {
+  name: 'History',
+  icon: '📜',
+  color: 'from-amber-500 to-orange-400'
+}, {
+  name: 'Arts',
+  icon: '🎨',
+  color: 'from-rose-500 to-red-400'
+}, {
+  name: 'Nature',
+  icon: '🌿',
+  color: 'from-green-500 to-emerald-400'
+}, {
+  name: 'Philosophy',
+  icon: '💭',
+  color: 'from-indigo-500 to-violet-400'
+}];
 export default function ExplorePage() {
   const [trendingArticles, setTrendingArticles] = useState<WikiSearchResult[]>([]);
   const [featuredArticle, setFeaturedArticle] = useState<WikiArticle | null>(null);
@@ -38,24 +76,21 @@ export default function ExplorePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [visibleTrending, setVisibleTrending] = useState(8);
   const [loadingMore, setLoadingMore] = useState(false);
-  const { recentArticles, notes, highlights } = useStore();
+  const {
+    recentArticles,
+    notes,
+    highlights
+  } = useStore();
   const navigate = useNavigate();
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const [trending, featured, random] = await Promise.all([
-          getTrendingArticles().catch(() => []),
-          getFeaturedArticle().catch(() => null),
-          getRandomArticles(8).catch(() => []),
-        ]);
-        
+        const [trending, featured, random] = await Promise.all([getTrendingArticles().catch(() => []), getFeaturedArticle().catch(() => null), getRandomArticles(8).catch(() => [])]);
         if (trending.length > 0) setTrendingArticles(trending);
         if (featured) setFeaturedArticle(featured);
-        if (random.length > 0) setRandomArticles(random);
-        else setRandomArticles(fallbackTopics);
+        if (random.length > 0) setRandomArticles(random);else setRandomArticles(fallbackTopics);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -64,18 +99,14 @@ export default function ExplorePage() {
     }
     fetchData();
   }, []);
-
   const handleCardClick = (title: string) => {
     navigate(`/article/${encodeURIComponent(title)}`);
   };
-
   const handleCategoryClick = (category: string) => {
     navigate(`/article/${encodeURIComponent(category)}`);
   };
-
   const loadMoreArticles = useCallback(() => {
     if (loadingMore || visibleTrending >= trendingArticles.length) return;
-    
     setLoadingMore(true);
     setTimeout(() => {
       setVisibleTrending(prev => Math.min(prev + 8, trendingArticles.length));
@@ -85,37 +116,41 @@ export default function ExplorePage() {
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loadingMore && visibleTrending < trendingArticles.length) {
-          loadMoreArticles();
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    );
-
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !loadingMore && visibleTrending < trendingArticles.length) {
+        loadMoreArticles();
+      }
+    }, {
+      threshold: 0.1,
+      rootMargin: '100px'
+    });
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
     }
-
     return () => observer.disconnect();
   }, [loadMoreArticles, loadingMore, visibleTrending, trendingArticles.length]);
-
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: {
+      opacity: 0
+    },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: {
+        staggerChildren: 0.1
+      }
     }
   };
-
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    hidden: {
+      opacity: 0,
+      y: 20
+    },
+    visible: {
+      opacity: 1,
+      y: 0
+    }
   };
-
-  return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+  return <div className="min-h-screen bg-background relative overflow-hidden">
       {/* CSS-only animated background */}
       <AnimatedBackground />
 
@@ -125,19 +160,27 @@ export default function ExplorePage() {
       <main className="relative z-10">
         {/* Hero Section */}
         <section className="min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center max-w-5xl mx-auto"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 30
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.8,
+          ease: "easeOut"
+        }} className="text-center max-w-5xl mx-auto">
             {/* Badge */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 mb-8 backdrop-blur-sm"
-            >
+            <motion.div initial={{
+            scale: 0.9,
+            opacity: 0
+          }} animate={{
+            scale: 1,
+            opacity: 1
+          }} transition={{
+            delay: 0.2,
+            duration: 0.5
+          }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 mb-8 backdrop-blur-sm">
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
               <span className="text-sm text-foreground/90 font-medium">Explore the Universe of Knowledge</span>
               <span className="px-2 py-0.5 rounded-full bg-accent/20 text-accent text-xs font-semibold">New</span>
@@ -148,11 +191,12 @@ export default function ExplorePage() {
               <span className="text-foreground">Welcome to </span>
               <span className="gradient-text text-glow relative">
                 knooq
-                <motion.span
-                  animate={{ rotate: [0, 15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-2 -right-8 text-2xl"
-                >
+                <motion.span animate={{
+                rotate: [0, 15, 0]
+              }} transition={{
+                duration: 2,
+                repeat: Infinity
+              }} className="absolute -top-2 -right-8 text-2xl">
                   ✨
                 </motion.span>
               </span>
@@ -170,12 +214,7 @@ export default function ExplorePage() {
             </div>
 
             {/* Quick stats */}
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-muted-foreground"
-            >
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-muted-foreground">
               <motion.div variants={itemVariants} className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 backdrop-blur-sm">
                 <BookOpen className="w-4 h-4 text-primary" />
                 <span>{recentArticles.length} articles read</span>
@@ -192,24 +231,27 @@ export default function ExplorePage() {
           </motion.div>
 
           {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="flex flex-col items-center gap-2 text-muted-foreground/60"
-            >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          delay: 1.5
+        }} className="absolute bottom-8 left-1/2 -translate-x-1/2">
+            <motion.div animate={{
+            y: [0, 10, 0]
+          }} transition={{
+            duration: 2,
+            repeat: Infinity
+          }} className="flex flex-col items-center gap-2 text-muted-foreground/60">
               <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
               <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-                <motion.div
-                  animate={{ y: [0, 12, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-1.5 h-1.5 rounded-full bg-primary"
-                />
+                <motion.div animate={{
+                y: [0, 12, 0]
+              }} transition={{
+                duration: 1.5,
+                repeat: Infinity
+              }} className="w-1.5 h-1.5 rounded-full bg-primary" />
               </div>
             </motion.div>
           </motion.div>
@@ -217,101 +259,57 @@ export default function ExplorePage() {
 
         {/* Features Section */}
         <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Everything you need to learn smarter, not harder
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {[
-                { icon: '🎯', title: 'Smart Highlighting', description: 'Highlight important text and organize your learnings with color-coded markers' },
-                { icon: '📝', title: 'Powerful Notes', description: 'Take notes directly on articles and access them anytime from your dashboard' },
-                { icon: '🤖', title: 'AI Assistant', description: 'Get instant summaries, explanations, and answers powered by AI' },
-                { icon: '🔖', title: 'Bookmarks', description: 'Save articles to read later and build your personal knowledge library' },
-                { icon: '📊', title: 'Progress Tracking', description: 'Track your reading history and see your learning journey unfold' },
-                { icon: '🌙', title: 'Dark Mode', description: 'Easy on the eyes with beautiful dark and light themes' },
-              ].map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  variants={itemVariants}
-                  className="group p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300"
-                >
-                  <span className="text-3xl mb-4 block">{feature.icon}</span>
-                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
+          
         </section>
 
         {/* Categories Section */}
         <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="text-center mb-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Explore by Category</h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 Dive into knowledge across different domains
               </p>
             </motion.div>
 
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
-            >
-              {categories.map((category, index) => (
-                <motion.button
-                  key={category.name}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleCategoryClick(category.name)}
-                  className="group relative p-4 sm:p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden"
-                >
+            <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+              {categories.map((category, index) => <motion.button key={category.name} variants={itemVariants} whileHover={{
+              scale: 1.05,
+              y: -5
+            }} whileTap={{
+              scale: 0.98
+            }} onClick={() => handleCategoryClick(category.name)} className="group relative p-4 sm:p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden">
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                   <span className="text-2xl sm:text-3xl mb-2 block">{category.icon}</span>
                   <span className="text-sm sm:text-base font-medium text-foreground">{category.name}</span>
-                </motion.button>
-              ))}
+                </motion.button>)}
             </motion.div>
           </div>
         </section>
 
         {/* Featured Article */}
         <AnimatePresence>
-          {featuredArticle && (
-            <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          {featuredArticle && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
               <div className="max-w-7xl mx-auto">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="flex items-center gap-3 mb-8"
-                >
+                <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} whileInView={{
+              opacity: 1,
+              y: 0
+            }} viewport={{
+              once: true
+            }} className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/50 flex items-center justify-center">
                     <Zap className="w-5 h-5 text-accent-foreground" />
                   </div>
@@ -321,28 +319,25 @@ export default function ExplorePage() {
                   </div>
                 </motion.div>
 
-                <motion.article
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                  onClick={() => handleCardClick(featuredArticle.title)}
-                  className="relative glass-card rounded-3xl overflow-hidden cursor-pointer group"
-                >
+                <motion.article initial={{
+              opacity: 0,
+              y: 20
+            }} whileInView={{
+              opacity: 1,
+              y: 0
+            }} viewport={{
+              once: true
+            }} whileHover={{
+              y: -5
+            }} onClick={() => handleCardClick(featuredArticle.title)} className="relative glass-card rounded-3xl overflow-hidden cursor-pointer group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   <div className="flex flex-col lg:flex-row">
-                    {featuredArticle.thumbnail && (
-                      <div className="lg:w-2/5 h-48 sm:h-64 lg:h-auto overflow-hidden relative">
-                        <img
-                          src={featuredArticle.thumbnail.source}
-                          alt={featuredArticle.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
+                    {featuredArticle.thumbnail && <div className="lg:w-2/5 h-48 sm:h-64 lg:h-auto overflow-hidden relative">
+                        <img src={featuredArticle.thumbnail.source} alt={featuredArticle.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background lg:block hidden" />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent lg:hidden" />
-                      </div>
-                    )}
+                      </div>}
                     <div className="flex-1 p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
                       <Badge className="w-fit mb-4 bg-accent/20 text-accent border-accent/30 hover:bg-accent/30">
                         <Star className="w-3 h-3 mr-1" />
@@ -362,20 +357,21 @@ export default function ExplorePage() {
                   </div>
                 </motion.article>
               </div>
-            </section>
-          )}
+            </section>}
         </AnimatePresence>
 
         {/* Trending Articles */}
-        {trendingArticles.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        {trendingArticles.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <div className="max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-center justify-between mb-8"
-              >
+              <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-primary-foreground" />
@@ -385,83 +381,63 @@ export default function ExplorePage() {
                     <p className="text-sm text-muted-foreground">What the world is reading</p>
                   </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setVisibleTrending(trendingArticles.length)}
-                  disabled={visibleTrending >= trendingArticles.length}
-                >
+                <Button variant="ghost" className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground" onClick={() => setVisibleTrending(trendingArticles.length)} disabled={visibleTrending >= trendingArticles.length}>
                   {visibleTrending >= trendingArticles.length ? 'Showing all' : 'View all'}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </motion.div>
 
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-              >
+              <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <AnimatePresence>
-                  {trendingArticles.slice(0, visibleTrending).map((article, index) => (
-                    <motion.div 
-                      key={article.pageid} 
-                      variants={itemVariants}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index >= visibleTrending - 8 ? (index % 8) * 0.1 : 0 }}
-                    >
-                      <TopicCard
-                        article={article}
-                        index={index}
-                        size={index === 0 || index === 3 ? 'lg' : 'md'}
-                      />
-                    </motion.div>
-                  ))}
+                  {trendingArticles.slice(0, visibleTrending).map((article, index) => <motion.div key={article.pageid} variants={itemVariants} initial={{
+                opacity: 0,
+                y: 20
+              }} animate={{
+                opacity: 1,
+                y: 0
+              }} transition={{
+                delay: index >= visibleTrending - 8 ? index % 8 * 0.1 : 0
+              }}>
+                      <TopicCard article={article} index={index} size={index === 0 || index === 3 ? 'lg' : 'md'} />
+                    </motion.div>)}
                 </AnimatePresence>
               </motion.div>
 
               {/* Infinite Scroll Trigger */}
               <div ref={loadMoreRef} className="w-full py-8">
-                {visibleTrending < trendingArticles.length && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center gap-3"
-                  >
-                    {loadingMore ? (
-                      <div className="flex items-center gap-3 text-muted-foreground">
+                {visibleTrending < trendingArticles.length && <motion.div initial={{
+              opacity: 0
+            }} animate={{
+              opacity: 1
+            }} className="flex flex-col items-center justify-center gap-3">
+                    {loadingMore ? <div className="flex items-center gap-3 text-muted-foreground">
                         <Loader2 className="w-5 h-5 animate-spin text-primary" />
                         <span className="text-sm">Loading more articles...</span>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground/60">
+                      </div> : <p className="text-sm text-muted-foreground/60">
                         Scroll for more • {trendingArticles.length - visibleTrending} remaining
-                      </p>
-                    )}
-                  </motion.div>
-                )}
-                {visibleTrending >= trendingArticles.length && trendingArticles.length > 8 && (
-                  <p className="text-center text-sm text-muted-foreground/60">
+                      </p>}
+                  </motion.div>}
+                {visibleTrending >= trendingArticles.length && trendingArticles.length > 8 && <p className="text-center text-sm text-muted-foreground/60">
                     You've seen all trending articles
-                  </p>
-                )}
+                  </p>}
               </div>
             </div>
-          </section>
-        )}
+          </section>}
 
         {/* Quick Discover - Shows while loading or as fallback */}
-        {(isLoading || trendingArticles.length === 0) && (
-          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        {(isLoading || trendingArticles.length === 0) && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <div className="max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-center gap-3 mb-8"
-              >
+              <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/50 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-accent-foreground" />
                 </div>
@@ -471,22 +447,15 @@ export default function ExplorePage() {
                 </div>
               </motion.div>
 
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-              >
-                {fallbackTopics.map((topic, index) => (
-                  <motion.button
-                    key={topic.pageid}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleCardClick(topic.title)}
-                    className="glass-card rounded-2xl p-5 sm:p-6 text-left group relative overflow-hidden"
-                  >
+              <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {fallbackTopics.map((topic, index) => <motion.button key={topic.pageid} variants={itemVariants} whileHover={{
+              scale: 1.02,
+              y: -5
+            }} whileTap={{
+              scale: 0.98
+            }} onClick={() => handleCardClick(topic.title)} className="glass-card rounded-2xl p-5 sm:p-6 text-left group relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative z-10">
                       <div className="flex items-start justify-between mb-4">
@@ -504,23 +473,23 @@ export default function ExplorePage() {
                         {topic.extract}
                       </p>
                     </div>
-                  </motion.button>
-                ))}
+                  </motion.button>)}
               </motion.div>
             </div>
-          </section>
-        )}
+          </section>}
 
         {/* Recent Articles */}
-        {recentArticles.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        {recentArticles.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <div className="max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-center gap-3 mb-8"
-              >
+              <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
@@ -530,35 +499,27 @@ export default function ExplorePage() {
                 </div>
               </motion.div>
 
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-              >
-                {recentArticles.slice(0, 6).map((article, index) => (
-                  <motion.div key={article.pageid} variants={itemVariants}>
-                    <TopicCard
-                      article={{
-                        pageid: article.pageid,
-                        title: article.title,
-                        extract: article.extract,
-                        thumbnail: article.thumbnail ? { source: article.thumbnail, width: 300, height: 200 } : undefined,
-                      }}
-                      index={index}
-                      size="sm"
-                    />
-                  </motion.div>
-                ))}
+              <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {recentArticles.slice(0, 6).map((article, index) => <motion.div key={article.pageid} variants={itemVariants}>
+                    <TopicCard article={{
+                pageid: article.pageid,
+                title: article.title,
+                extract: article.extract,
+                thumbnail: article.thumbnail ? {
+                  source: article.thumbnail,
+                  width: 300,
+                  height: 200
+                } : undefined
+              }} index={index} size="sm" />
+                  </motion.div>)}
               </motion.div>
             </div>
-          </section>
-        )}
+          </section>}
 
         {/* Footer gradient */}
         <div className="h-32 bg-gradient-to-t from-background to-transparent" />
       </main>
-    </div>
-  );
+    </div>;
 }
