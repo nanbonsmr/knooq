@@ -1,0 +1,164 @@
+import { useState, useCallback } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { BookOpen, StickyNote, ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface MobileStudyModeProps {
+  articleContent: React.ReactNode;
+  notesPanel: React.ReactNode;
+}
+
+export default function MobileStudyMode({ articleContent, notesPanel }: MobileStudyModeProps) {
+  const [activePanel, setActivePanel] = useState<'article' | 'notes'>('article');
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 100;
+    const velocity = info.velocity.x;
+    const offset = info.offset.x;
+
+    if (Math.abs(velocity) > 500 || Math.abs(offset) > threshold) {
+      if (offset > 0 || velocity > 500) {
+        // Swiped right - go to article
+        setActivePanel('article');
+      } else if (offset < 0 || velocity < -500) {
+        // Swiped left - go to notes
+        setActivePanel('notes');
+      }
+    }
+    setDragOffset(0);
+  }, []);
+
+  const handleDrag = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Limit drag based on current panel
+    if (activePanel === 'article' && info.offset.x > 0) {
+      setDragOffset(0);
+    } else if (activePanel === 'notes' && info.offset.x < 0) {
+      setDragOffset(0);
+    } else {
+      setDragOffset(info.offset.x * 0.3); // Resistance effect
+    }
+  }, [activePanel]);
+
+  const panels = [
+    { id: 'article', label: 'Article', icon: BookOpen },
+    { id: 'notes', label: 'Notes', icon: StickyNote },
+  ] as const;
+
+  return (
+    <div className="flex flex-col h-full bg-background overflow-hidden">
+      {/* Tab Bar */}
+      <div className="flex items-center border-b border-border/30 bg-background/95 backdrop-blur-sm">
+        {panels.map((panel) => {
+          const Icon = panel.icon;
+          const isActive = activePanel === panel.id;
+          return (
+            <button
+              key={panel.id}
+              onClick={() => setActivePanel(panel.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 transition-colors relative ${
+                isActive ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="text-sm font-medium">{panel.label}</span>
+              {isActive && (
+                <motion.div
+                  layoutId="study-tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Swipe hint */}
+      <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground bg-secondary/30">
+        <ChevronLeft className="w-3 h-3" />
+        <span>Swipe to switch panels</span>
+        <ChevronRight className="w-3 h-3" />
+      </div>
+
+      {/* Swipeable Content */}
+      <motion.div
+        className="flex-1 relative overflow-hidden"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        style={{ x: dragOffset }}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {activePanel === 'article' ? (
+            <motion.div
+              key="article"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 overflow-auto"
+            >
+              {articleContent}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="notes"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 overflow-hidden"
+            >
+              {notesPanel}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Edge indicators while dragging */}
+        <AnimatePresence>
+          {dragOffset !== 0 && (
+            <>
+              {dragOffset > 0 && activePanel === 'notes' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: Math.min(Math.abs(dragOffset) / 50, 1) }}
+                  exit={{ opacity: 0 }}
+                  className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none bg-gradient-to-r from-primary/20 to-transparent"
+                >
+                  <ChevronLeft className="w-6 h-6 text-primary" />
+                </motion.div>
+              )}
+              {dragOffset < 0 && activePanel === 'article' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: Math.min(Math.abs(dragOffset) / 50, 1) }}
+                  exit={{ opacity: 0 }}
+                  className="absolute right-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none bg-gradient-to-l from-primary/20 to-transparent"
+                >
+                  <ChevronRight className="w-6 h-6 text-primary" />
+                </motion.div>
+              )}
+            </>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Panel indicator dots */}
+      <div className="flex items-center justify-center gap-2 py-3 bg-background/95 border-t border-border/30">
+        {panels.map((panel) => (
+          <button
+            key={panel.id}
+            onClick={() => setActivePanel(panel.id)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              activePanel === panel.id 
+                ? 'bg-primary w-6' 
+                : 'bg-muted-foreground/30'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
