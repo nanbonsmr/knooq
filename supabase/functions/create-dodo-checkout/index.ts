@@ -22,13 +22,11 @@ serve(async (req) => {
       throw new Error("productId and userId are required");
     }
 
-    // Detect test mode - Dodo uses "test_" prefix for test API keys
-    const isTestMode = dodoApiKey.includes("test");
-    const baseUrl = isTestMode 
-      ? "https://test.dodopayments.com" 
-      : "https://live.dodopayments.com";
+    // Use test mode - user confirmed they are in test mode
+    // Dodo test keys may have various prefixes, so we use test endpoint
+    const baseUrl = "https://test.dodopayments.com";
 
-    console.log("Creating Dodo checkout for:", { productId, userId, userEmail, isTestMode, baseUrl, keyPrefix: dodoApiKey.substring(0, 10) });
+    console.log("Creating Dodo checkout for:", { productId, userId, userEmail, baseUrl });
 
     const origin = req.headers.get("origin") || "https://knooq.lovable.app";
 
@@ -51,8 +49,17 @@ serve(async (req) => {
       }),
     });
 
-    const data = await response.json();
-    console.log("Dodo response:", JSON.stringify(data, null, 2));
+    // Get response as text first to handle empty responses
+    const responseText = await response.text();
+    console.log("Dodo response status:", response.status);
+    console.log("Dodo response text:", responseText);
+
+    let data;
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      throw new Error(`Invalid response from Dodo: ${responseText}`);
+    }
 
     if (!response.ok) {
       console.error("Dodo API error:", data);
