@@ -30,8 +30,8 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://knooq.lovable.app";
 
-    // Create a checkout session using Dodo Payments API
-    const response = await fetch(`${baseUrl}/checkout_sessions`, {
+    // Create a checkout session using Dodo Payments API - endpoint is /checkouts
+    const response = await fetch(`${baseUrl}/checkouts`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${dodoApiKey}`,
