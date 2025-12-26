@@ -15,7 +15,10 @@ import {
   X,
   Trash2,
   Highlighter,
-  Crown
+  Crown,
+  WifiOff,
+  Download,
+  CheckCircle2
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
@@ -32,6 +35,7 @@ import { ProGate, ProBadge } from '@/components/ProGate';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useHighlights } from '@/hooks/useHighlights';
 import { useNotes } from '@/hooks/useNotes';
+import { useOfflineArticles } from '@/hooks/useOfflineArticles';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -72,8 +76,17 @@ export default function ArticlePage() {
   
   const { addNote: addNoteToDb } = useNotes(article?.title, article ? String(article.pageid) : undefined);
 
+  const { 
+    isOnline, 
+    saveArticleForOffline, 
+    isArticleCached, 
+    removeArticleFromCache,
+    getOfflineArticle 
+  } = useOfflineArticles();
+
   const { isPro } = useSubscription();
   const bookmarked = article ? isBookmarked(article.pageid) : false;
+  const isOfflineCached = article ? isArticleCached(article.title) : false;
   const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
   const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [isHighlightsPanelOpen, setIsHighlightsPanelOpen] = useState(false);
@@ -87,8 +100,29 @@ export default function ArticlePage() {
       if (!title) return;
       
       setIsLoading(true);
+      const decodedTitle = decodeURIComponent(title);
+      
+      // Check if offline and we have cached content
+      if (!isOnline) {
+        const cachedArticle = getOfflineArticle(decodedTitle);
+        if (cachedArticle) {
+          setArticle({
+            title: cachedArticle.title,
+            pageid: 0,
+            extract: cachedArticle.content.substring(0, 500),
+            content_urls: { desktop: { page: '' }, mobile: { page: '' } },
+          } as WikiArticle);
+          setHtmlContent(cachedArticle.content);
+          setIsLoading(false);
+          toast({
+            title: 'Offline Mode',
+            description: 'Showing cached version of this article.',
+          });
+          return;
+        }
+      }
+      
       try {
-        const decodedTitle = decodeURIComponent(title);
         const [articleData, content, related] = await Promise.all([
           getArticle(decodedTitle),
           getArticleContent(decodedTitle),
@@ -119,18 +153,35 @@ export default function ArticlePage() {
         setRelatedArticles(related);
       } catch (error) {
         console.error('Failed to fetch article:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load article. Please try again.',
-          variant: 'destructive',
-        });
+        
+        // Try to load from cache on error
+        const cachedArticle = getOfflineArticle(decodedTitle);
+        if (cachedArticle) {
+          setArticle({
+            title: cachedArticle.title,
+            pageid: 0,
+            extract: cachedArticle.content.substring(0, 500),
+            content_urls: { desktop: { page: '' }, mobile: { page: '' } },
+          } as WikiArticle);
+          setHtmlContent(cachedArticle.content);
+          toast({
+            title: 'Loaded from cache',
+            description: 'Showing cached version due to network error.',
+          });
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Failed to load article. Please try again.',
+            variant: 'destructive',
+          });
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchArticle();
-  }, [title, addRecentArticle]);
+  }, [title, addRecentArticle, isOnline, getOfflineArticle]);
 
   // Track scroll progress
   useEffect(() => {
@@ -204,6 +255,16 @@ export default function ArticlePage() {
       window.open(article.content_urls.desktop.page, '_blank');
     } else if (title) {
       window.open(`https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`, '_blank');
+    }
+  };
+
+  const handleSaveForOffline = () => {
+    if (!article || !htmlContent) return;
+    
+    if (isOfflineCached) {
+      removeArticleFromCache(article.title);
+    } else {
+      saveArticleForOffline(article.title, htmlContent);
     }
   };
 
@@ -376,6 +437,19 @@ export default function ArticlePage() {
               <BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             ) : (
               <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSaveForOffline}
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
+            title={isOfflineCached ? "Remove from offline" : "Save for offline"}
+          >
+            {isOfflineCached ? (
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+            ) : (
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </Button>
           {!isStudyMode && (

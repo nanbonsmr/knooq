@@ -1,16 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown, WifiOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import logo from '@/assets/logo.png';
+
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
   const {
     user,
     signOut,
@@ -74,6 +90,14 @@ export default function Header() {
                   <p className="text-[9px] xs:text-[10px] sm:text-xs text-muted-foreground -mt-0.5 sm:-mt-1 hidden xs:block">Knowledge Platform</p>
                 </div>
               </Link>
+
+              {/* Offline Indicator */}
+              {!isOnline && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-500 text-xs font-medium">
+                  <WifiOff className="w-3 h-3" />
+                  <span className="hidden sm:inline">Offline</span>
+                </div>
+              )}
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
