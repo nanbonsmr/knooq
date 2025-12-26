@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter } from 'lucide-react';
+import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter, StickyNote, MessageSquare, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -72,6 +72,49 @@ export default function PricingPage() {
     { icon: Sparkles, text: 'AI chat assistant', free: false, pro: true },
     { icon: Cloud, text: 'Cloud sync across devices', free: false, pro: true },
     { icon: Zap, text: 'Smart note suggestions', free: false, pro: true },
+  ];
+
+  const proFeatures = [
+    {
+      icon: Highlighter,
+      title: 'Smart Highlights',
+      description: 'Highlight important text while reading and access them anytime from your dashboard.',
+    },
+    {
+      icon: StickyNote,
+      title: 'Quick Notes',
+      description: 'Add notes directly from selected text with one click. Organize your thoughts effortlessly.',
+    },
+    {
+      icon: BookOpen,
+      title: 'Study Mode',
+      description: 'Focus on learning with a distraction-free reading experience and split-view workspace.',
+    },
+    {
+      icon: Brain,
+      title: 'AI Summaries',
+      description: 'Get instant TL;DR summaries of any article powered by advanced AI models.',
+    },
+    {
+      icon: MessageSquare,
+      title: 'AI Chat Assistant',
+      description: 'Ask questions about the article and get intelligent answers in real-time.',
+    },
+    {
+      icon: Zap,
+      title: 'AI Note Suggestions',
+      description: 'Let AI analyze the article and suggest relevant notes and key takeaways.',
+    },
+    {
+      icon: Cloud,
+      title: 'Cloud Sync',
+      description: 'Access your highlights, notes, and bookmarks from any device, anywhere.',
+    },
+    {
+      icon: Download,
+      title: 'Export Notes',
+      description: 'Export your notes and highlights to PDF or text files for offline use.',
+    },
   ];
 
   return (
@@ -219,12 +262,49 @@ export default function PricingPage() {
           </motion.div>
         </div>
 
-        {/* FAQ or trust badges could go here */}
+        {/* Pro Features Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-24"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Everything You Get with <span className="gradient-text">Pro</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Unlock the full potential of your learning experience with these powerful features.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {proFeatures.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.05 }}
+                className="glass-card rounded-2xl p-6 hover:border-primary/30 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                  <feature.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Trust section */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-sm text-muted-foreground mt-12"
+          transition={{ delay: 0.6 }}
+          className="text-center text-sm text-muted-foreground mt-16"
         >
           Cancel anytime. Secure payment powered by Dodo Payments.
         </motion.p>
