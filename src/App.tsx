@@ -16,6 +16,7 @@ import InstallPage from "./pages/InstallPage";
 import OfflineArticlesPage from "./pages/OfflineArticlesPage";
 import NotFound from "./pages/NotFound";
 import MobileBottomNav from "./components/MobileBottomNav";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <MobileBottomNav />
+            <PWAInstallBanner />
           </BrowserRouter>
         </TooltipProvider>
       </SubscriptionProvider>
