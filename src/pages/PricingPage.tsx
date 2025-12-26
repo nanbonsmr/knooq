@@ -80,6 +80,31 @@ export default function PricingPage() {
     { icon: Zap, text: 'Smart note suggestions', free: false, pro: true },
   ];
 
+  const comparisonFeatures = [
+    { category: 'Reading', features: [
+      { name: 'Browse Wikipedia articles', free: true, pro: true },
+      { name: 'Search articles', free: true, pro: true },
+      { name: 'Bookmark articles', free: true, pro: true },
+      { name: 'Study Mode', free: false, pro: true },
+    ]},
+    { category: 'Notes & Highlights', features: [
+      { name: 'View existing notes', free: true, pro: true },
+      { name: 'Create highlights', free: false, pro: true },
+      { name: 'Add notes from selection', free: false, pro: true },
+      { name: 'Export notes to PDF', free: false, pro: true },
+    ]},
+    { category: 'AI Features', features: [
+      { name: 'AI article summaries', free: false, pro: true },
+      { name: 'AI chat assistant', free: false, pro: true },
+      { name: 'AI note suggestions', free: false, pro: true },
+    ]},
+    { category: 'Sync & Storage', features: [
+      { name: 'Local storage', free: true, pro: true },
+      { name: 'Cloud sync', free: false, pro: true },
+      { name: 'Cross-device access', free: false, pro: true },
+    ]},
+  ];
+
   const proFeatures = [
     {
       icon: Highlighter,
@@ -301,6 +326,60 @@ export default function PricingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="mt-24"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Compare <span className="gradient-text">Plans</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              See exactly what you get with each plan.
+            </p>
+          </div>
+
+          {/* Comparison Table */}
+          <div className="glass-card rounded-2xl overflow-hidden max-w-4xl mx-auto mb-24">
+            <div className="grid grid-cols-3 gap-4 p-6 border-b border-border/50 bg-secondary/30">
+              <div className="font-semibold">Feature</div>
+              <div className="text-center font-semibold">Free</div>
+              <div className="text-center font-semibold flex items-center justify-center gap-2">
+                <Crown className="w-4 h-4 text-primary" />
+                Pro
+              </div>
+            </div>
+            {comparisonFeatures.map((category, catIndex) => (
+              <div key={catIndex}>
+                <div className="px-6 py-3 bg-secondary/20 font-medium text-sm text-muted-foreground">
+                  {category.category}
+                </div>
+                {category.features.map((feature, featIndex) => (
+                  <div
+                    key={featIndex}
+                    className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-border/30 last:border-b-0"
+                  >
+                    <div className="text-sm">{feature.name}</div>
+                    <div className="flex justify-center">
+                      {feature.free ? (
+                        <Check className="w-5 h-5 text-accent" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border border-muted-foreground/30" />
+                      )}
+                    </div>
+                    <div className="flex justify-center">
+                      <Check className="w-5 h-5 text-accent" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Pro Features Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-24"
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
