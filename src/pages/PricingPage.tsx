@@ -192,31 +192,31 @@ export default function PricingPage() {
         <span className="text-sm font-medium">Back to Home</span>
       </Link>
 
-      <div className="container mx-auto px-4 py-24 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 text-primary mb-6">
-            <Crown className="w-4 h-4" />
-            <span className="text-sm font-medium">Upgrade to Pro</span>
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/20 text-primary mb-4 sm:mb-6">
+            <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm font-medium">Upgrade to Pro</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
             Unlock Your Full
             <span className="block gradient-text">Learning Potential</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Get unlimited access to AI features, cloud sync, and smart note-taking tools.
           </p>
         </motion.div>
 
         {/* Billing toggle */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8 sm:mb-12">
           <div className="inline-flex items-center p-1 rounded-xl bg-secondary/50">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 billingCycle === 'monthly'
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -226,45 +226,45 @@ export default function PricingPage() {
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                 billingCycle === 'yearly'
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Yearly
-              <span className="ml-2 text-xs text-accent">Save 20%</span>
+              <span className="ml-1.5 sm:ml-2 text-[10px] sm:text-xs text-accent">Save 20%</span>
             </button>
           </div>
         </div>
 
         {/* Pricing cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {/* Free plan */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-card rounded-3xl p-8"
+            className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-8"
           >
-            <h3 className="text-xl font-bold mb-2">Free</h3>
-            <p className="text-muted-foreground mb-6">Basic access to explore</p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold">$0</span>
-              <span className="text-muted-foreground">/month</span>
+            <h3 className="text-lg sm:text-xl font-bold mb-2">Free</h3>
+            <p className="text-sm text-muted-foreground mb-4 sm:mb-6">Basic access to explore</p>
+            <div className="mb-4 sm:mb-6">
+              <span className="text-3xl sm:text-4xl font-bold">$0</span>
+              <span className="text-muted-foreground text-sm">/month</span>
             </div>
-            <Button variant="outline" className="w-full mb-8" disabled>
+            <Button variant="outline" className="w-full mb-6 sm:mb-8" disabled>
               Current Plan
             </Button>
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               {features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3">
+                <li key={index} className="flex items-center gap-2 sm:gap-3">
                   {feature.free ? (
-                    <Check className="w-5 h-5 text-accent" />
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                   ) : (
-                    <div className="w-5 h-5 rounded-full border border-muted-foreground/30" />
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-muted-foreground/30 flex-shrink-0" />
                   )}
-                  <span className={feature.free ? 'text-foreground' : 'text-muted-foreground'}>
+                  <span className={`text-sm ${feature.free ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {feature.text}
                   </span>
                 </li>
@@ -277,29 +277,29 @@ export default function PricingPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-card rounded-3xl p-8 border-2 border-primary/50 relative overflow-hidden"
+            className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-8 border-2 border-primary/50 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold px-4 py-1 rounded-bl-xl">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-accent text-primary-foreground text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1 rounded-bl-xl">
               POPULAR
             </div>
-            <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-              <Crown className="w-5 h-5 text-primary" />
+            <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2">
+              <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               Pro
             </h3>
-            <p className="text-muted-foreground mb-6">Full access to all features</p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold">
+            <p className="text-sm text-muted-foreground mb-4 sm:mb-6">Full access to all features</p>
+            <div className="mb-4 sm:mb-6">
+              <span className="text-3xl sm:text-4xl font-bold">
                 ${billingCycle === 'monthly' ? '9.99' : '7.99'}
               </span>
-              <span className="text-muted-foreground">/month</span>
+              <span className="text-muted-foreground text-sm">/month</span>
               {billingCycle === 'yearly' && (
-                <p className="text-sm text-accent mt-1">Billed annually ($95.88/year)</p>
+                <p className="text-xs sm:text-sm text-accent mt-1">Billed annually ($95.88/year)</p>
               )}
             </div>
             <Button
               onClick={handleSubscribe}
               disabled={isLoading || isPro}
-              className="w-full mb-8 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              className="w-full mb-6 sm:mb-8 bg-gradient-to-r from-primary to-accent hover:opacity-90"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
@@ -309,11 +309,11 @@ export default function PricingPage() {
                 'Get Pro'
               )}
             </Button>
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               {features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-accent" />
-                  <span className="text-foreground">{feature.text}</span>
+                <li key={index} className="flex items-center gap-2 sm:gap-3">
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
+                  <span className="text-sm text-foreground">{feature.text}</span>
                 </li>
               ))}
             </ul>
@@ -325,47 +325,47 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-24"
+          className="mt-16 sm:mt-24"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
               Compare <span className="gradient-text">Plans</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-4">
               See exactly what you get with each plan.
             </p>
           </div>
 
-          {/* Comparison Table */}
-          <div className="glass-card rounded-2xl overflow-hidden max-w-4xl mx-auto mb-24">
-            <div className="grid grid-cols-3 gap-4 p-6 border-b border-border/50 bg-secondary/30">
-              <div className="font-semibold">Feature</div>
-              <div className="text-center font-semibold">Free</div>
-              <div className="text-center font-semibold flex items-center justify-center gap-2">
-                <Crown className="w-4 h-4 text-primary" />
+          {/* Comparison Table - Mobile optimized */}
+          <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden max-w-4xl mx-auto mb-16 sm:mb-24">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 border-b border-border/50 bg-secondary/30">
+              <div className="font-semibold text-xs sm:text-base">Feature</div>
+              <div className="text-center font-semibold text-xs sm:text-base">Free</div>
+              <div className="text-center font-semibold text-xs sm:text-base flex items-center justify-center gap-1 sm:gap-2">
+                <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                 Pro
               </div>
             </div>
             {comparisonFeatures.map((category, catIndex) => (
               <div key={catIndex}>
-                <div className="px-6 py-3 bg-secondary/20 font-medium text-sm text-muted-foreground">
+                <div className="px-4 sm:px-6 py-2 sm:py-3 bg-secondary/20 font-medium text-xs sm:text-sm text-muted-foreground">
                   {category.category}
                 </div>
                 {category.features.map((feature, featIndex) => (
                   <div
                     key={featIndex}
-                    className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-border/30 last:border-b-0"
+                    className="grid grid-cols-3 gap-2 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-border/30 last:border-b-0"
                   >
-                    <div className="text-sm">{feature.name}</div>
+                    <div className="text-xs sm:text-sm">{feature.name}</div>
                     <div className="flex justify-center">
                       {feature.free ? (
-                        <Check className="w-5 h-5 text-accent" />
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full border border-muted-foreground/30" />
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-muted-foreground/30" />
                       )}
                     </div>
                     <div className="flex justify-center">
-                      <Check className="w-5 h-5 text-accent" />
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                     </div>
                   </div>
                 ))}
@@ -379,31 +379,31 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mb-24"
+          className="mb-16 sm:mb-24"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
               Everything You Get with <span className="gradient-text">Pro</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-4">
               Unlock the full potential of your learning experience with these powerful features.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
             {proFeatures.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + index * 0.05 }}
-                className="glass-card rounded-2xl p-6 hover:border-primary/30 transition-all group"
+                className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-primary/30 transition-all group"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
-                  <feature.icon className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/20 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/30 transition-colors">
+                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <h3 className="font-semibold text-sm sm:text-lg mb-1 sm:mb-2">{feature.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-3">
                   {feature.description}
                 </p>
               </motion.div>
@@ -416,32 +416,32 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-24 max-w-3xl mx-auto"
+          className="mt-16 sm:mt-24 max-w-3xl mx-auto"
         >
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 text-muted-foreground mb-6">
-              <HelpCircle className="w-4 h-4" />
-              <span className="text-sm font-medium">FAQ</span>
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-secondary/50 text-muted-foreground mb-4 sm:mb-6">
+              <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm font-medium">FAQ</span>
             </div>
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Got questions? We have answers.
             </p>
           </div>
 
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="glass-card rounded-2xl px-6 border-none"
+                className="glass-card rounded-xl sm:rounded-2xl px-4 sm:px-6 border-none"
               >
-                <AccordionTrigger className="text-left font-medium hover:no-underline py-5">
+                <AccordionTrigger className="text-left font-medium hover:no-underline py-4 sm:py-5 text-sm sm:text-base">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5">
+                <AccordionContent className="text-muted-foreground pb-4 sm:pb-5 text-sm">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -454,36 +454,36 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="mt-24"
+          className="mt-16 sm:mt-24"
         >
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
-              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-4">
-                <RefreshCcw className="w-7 h-7 text-accent" />
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center p-4 sm:p-6 glass-card rounded-xl sm:rounded-2xl">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent/20 flex items-center justify-center mb-2 sm:mb-4">
+                <RefreshCcw className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
               </div>
-              <h4 className="font-semibold mb-1">7-Day Money Back</h4>
-              <p className="text-sm text-muted-foreground">Full refund if not satisfied</p>
+              <h4 className="font-semibold text-xs sm:text-base mb-0.5 sm:mb-1">7-Day Money Back</h4>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">Full refund if not satisfied</p>
             </div>
-            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
-              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                <Shield className="w-7 h-7 text-primary" />
+            <div className="flex flex-col items-center text-center p-4 sm:p-6 glass-card rounded-xl sm:rounded-2xl">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-2 sm:mb-4">
+                <Shield className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
               </div>
-              <h4 className="font-semibold mb-1">Secure Checkout</h4>
-              <p className="text-sm text-muted-foreground">256-bit SSL encryption</p>
+              <h4 className="font-semibold text-xs sm:text-base mb-0.5 sm:mb-1">Secure Checkout</h4>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">256-bit SSL encryption</p>
             </div>
-            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
-              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-4">
-                <CreditCard className="w-7 h-7 text-accent" />
+            <div className="flex flex-col items-center text-center p-4 sm:p-6 glass-card rounded-xl sm:rounded-2xl">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent/20 flex items-center justify-center mb-2 sm:mb-4">
+                <CreditCard className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
               </div>
-              <h4 className="font-semibold mb-1">Cancel Anytime</h4>
-              <p className="text-sm text-muted-foreground">No hidden fees or contracts</p>
+              <h4 className="font-semibold text-xs sm:text-base mb-0.5 sm:mb-1">Cancel Anytime</h4>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">No hidden fees or contracts</p>
             </div>
-            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
-              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                <Lock className="w-7 h-7 text-primary" />
+            <div className="flex flex-col items-center text-center p-4 sm:p-6 glass-card rounded-xl sm:rounded-2xl">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary/20 flex items-center justify-center mb-2 sm:mb-4">
+                <Lock className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
               </div>
-              <h4 className="font-semibold mb-1">Privacy First</h4>
-              <p className="text-sm text-muted-foreground">Your data stays private</p>
+              <h4 className="font-semibold text-xs sm:text-base mb-0.5 sm:mb-1">Privacy First</h4>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">Your data stays private</p>
             </div>
           </div>
         </motion.div>
