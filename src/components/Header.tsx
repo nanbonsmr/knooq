@@ -288,13 +288,6 @@ export default function Header() {
                     </>}
                 </div>
 
-                {/* Footer */}
-                <div className="p-6 border-t border-border/30">
-                  <div className="flex items-center gap-2">
-                    
-                    <span className="text-sm text-muted-foreground">Connected to Wikipedia</span>
-                  </div>
-                </div>
               </div>
             </motion.div>
           </>}
