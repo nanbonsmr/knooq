@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Tag, Search, StickyNote, Quote, GripVertical, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Tag, Search, StickyNote, Quote, GripVertical, Loader2, MousePointerClick } from 'lucide-react';
 import { useNotes } from '@/hooks/useNotes';
 import { Note } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [draggedText, setDraggedText] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const filteredNotes = notes.filter((note) => {
     const matchesSearch = searchQuery
@@ -30,28 +31,53 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
     return matchesSearch;
   });
 
-  // Handle drop events for dragged text
+  // Handle drag events
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set to false if leaving the container entirely
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDragOver(false);
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const text = e.dataTransfer?.getData('text/plain');
-    if (text) {
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const text = e.dataTransfer?.getData('text/plain')?.trim();
+    if (text && text.length > 0) {
       setDraggedText(text);
-      setNewNoteContent(text);
+      setNewNoteContent('');
       setIsAddingNote(true);
     }
   };
 
   const handleAddNote = async (highlightedText?: string) => {
-    const content = highlightedText || newNoteContent;
-    if (!content.trim()) return;
+    const content = newNoteContent;
+    const quote = highlightedText || draggedText;
+    
+    if (!content.trim() && !quote) return;
 
     await addNote({
-      content,
-      highlightedText: highlightedText || draggedText || undefined,
+      content: content || 'Note from highlighted text',
+      highlightedText: quote || undefined,
       tags: newTags.split(',').map((t) => t.trim()).filter(Boolean),
     });
 
@@ -64,7 +90,11 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
   return (
     <div 
       id="study-workspace" 
-      className="flex flex-col h-full bg-background/50"
+      className={`flex flex-col h-full bg-background/50 transition-all duration-200 ${
+        isDragOver ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
+      }`}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -80,13 +110,41 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
         </div>
       </div>
 
-      {/* Drag hint - hide on small screens */}
-      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-primary/5 border-b border-border/20 hidden sm:block">
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-          <GripVertical className="w-4 h-4" />
-          <span>Select text from article and drag here to create a note</span>
-        </div>
-      </div>
+      {/* Drag hint / Drop zone indicator */}
+      <AnimatePresence mode="wait">
+        {isDragOver ? (
+          <motion.div
+            key="drop-zone"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="px-3 sm:px-4 py-6 bg-primary/10 border-b border-primary/30"
+          >
+            <div className="flex flex-col items-center justify-center gap-2 text-primary">
+              <motion.div
+                animate={{ y: [0, -5, 0] }}
+                transition={{ repeat: Infinity, duration: 1 }}
+              >
+                <MousePointerClick className="w-8 h-8" />
+              </motion.div>
+              <span className="text-sm font-medium">Drop here to create a note</span>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="drag-hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-primary/5 border-b border-border/20 hidden sm:block"
+          >
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <GripVertical className="w-4 h-4" />
+              <span>Select text from article and drag here to create a note</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Search */}
       <div className="p-3 sm:p-4">
