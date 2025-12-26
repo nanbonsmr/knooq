@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -12,7 +12,6 @@ import {
   Clock,
   ChevronDown,
   BookOpen,
-  Network,
   X,
   Trash2,
   Highlighter
@@ -38,8 +37,6 @@ import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSea
 import { useStore } from '@/store/useStore';
 import { toast } from '@/hooks/use-toast';
 
-const ConceptMap = lazy(() => import('@/components/three/ConceptMap'));
-
 export default function ArticlePage() {
   const { title } = useParams<{ title: string }>();
   const navigate = useNavigate();
@@ -47,7 +44,6 @@ export default function ArticlePage() {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [readProgress, setReadProgress] = useState(0);
-  const [showConceptMap, setShowConceptMap] = useState(false);
   const [relatedArticles, setRelatedArticles] = useState<WikiSearchResult[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -357,15 +353,6 @@ export default function ArticlePage() {
             title="Study Mode"
           >
             <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
-          <Button
-            variant={showConceptMap ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setShowConceptMap(!showConceptMap)}
-            className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
-            title="Concept Map"
-          >
-            <Network className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             variant="ghost"
@@ -679,71 +666,6 @@ export default function ArticlePage() {
         </main>
       )}
 
-      {/* Concept Map Modal */}
-      <AnimatePresence>
-        {showConceptMap && article && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/90 backdrop-blur-md"
-              onClick={() => setShowConceptMap(false)}
-            />
-            
-            {/* Modal content */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-5xl h-[80vh] glass-card rounded-3xl overflow-hidden"
-            >
-              {/* Header */}
-              <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 glass border-b border-border/30">
-                <div className="flex items-center gap-3">
-                  <Network className="w-5 h-5 text-primary" />
-                  <h2 className="font-semibold text-lg">Related Topics</h2>
-                  <span className="text-sm text-muted-foreground">
-                    Click a node to explore
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowConceptMap(false)}
-                  className="rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* 3D Concept Map */}
-              <div className="w-full h-full pt-16">
-                <Suspense fallback={
-                  <div className="flex items-center justify-center h-full">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                  </div>
-                }>
-                  <ConceptMap
-                    centerArticle={article.title}
-                    relatedArticles={relatedArticles}
-                    onNodeClick={(nodeTitle) => {
-                      setShowConceptMap(false);
-                      navigate(`/article/${encodeURIComponent(nodeTitle)}`);
-                    }}
-                  />
-                </Suspense>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Wiki content styles */}
       <style>{`
