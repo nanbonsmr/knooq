@@ -435,7 +435,7 @@ export default function ArticlePage() {
         </Button>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
-          {/* Hide study mode on mobile - Pro only */}
+          {/* Study Mode - Pro only */}
           <Button
             variant={isStudyMode ? "default" : "ghost"}
             size="icon"
@@ -450,7 +450,7 @@ export default function ArticlePage() {
               }
               setStudyMode(!isStudyMode);
             }}
-            className="rounded-full hidden sm:flex w-8 h-8 sm:w-10 sm:h-10 relative"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10 relative"
             title="Study Mode (Pro)"
           >
             <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
