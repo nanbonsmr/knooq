@@ -88,12 +88,7 @@ export default function ExplorePage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const [trending, featured, popular, random] = await Promise.all([
-          getTrendingArticles().catch(() => []), 
-          getFeaturedArticle().catch(() => null), 
-          getPopularThisWeek().catch(() => []),
-          getRandomArticles(8).catch(() => [])
-        ]);
+        const [trending, featured, popular, random] = await Promise.all([getTrendingArticles().catch(() => []), getFeaturedArticle().catch(() => null), getPopularThisWeek().catch(() => []), getRandomArticles(8).catch(() => [])]);
         if (trending.length > 0) setTrendingArticles(trending);
         if (featured) setFeaturedArticle(featured);
         if (popular.length > 0) setPopularThisWeek(popular);
@@ -450,44 +445,7 @@ export default function ExplorePage() {
           </section>}
 
         {/* Recent Articles */}
-        {recentArticles.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-            <div className="max-w-7xl mx-auto">
-              <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }} className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold">Continue Reading</h2>
-                  <p className="text-sm text-muted-foreground">Pick up where you left off</p>
-                </div>
-              </motion.div>
-
-              <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
-            once: true
-          }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {recentArticles.slice(0, 6).map((article, index) => <motion.div key={article.pageid} variants={itemVariants}>
-                    <TopicCard article={{
-                pageid: article.pageid,
-                title: article.title,
-                extract: article.extract,
-                thumbnail: article.thumbnail ? {
-                  source: article.thumbnail,
-                  width: 300,
-                  height: 200
-                } : undefined
-              }} index={index} size="sm" />
-                  </motion.div>)}
-              </motion.div>
-            </div>
-          </section>}
+        {recentArticles.length > 0}
 
         {/* Footer gradient with extra padding for mobile nav */}
         <div className="h-32 md:h-32 pb-20 md:pb-0 bg-gradient-to-t from-background to-transparent" />
