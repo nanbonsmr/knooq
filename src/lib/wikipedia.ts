@@ -28,55 +28,45 @@ export interface WikiArticle {
   };
 }
 
-export async function searchWikipedia(query: string): Promise<WikiSearchResult[]> {
+export async function searchWikipedia(query: string, signal?: AbortSignal): Promise<WikiSearchResult[]> {
   if (!query.trim()) return [];
 
+  // Use opensearch for faster initial results, then batch fetch details
   const params = new URLSearchParams({
     action: 'query',
-    list: 'search',
-    srsearch: query,
-    srlimit: '10',
+    generator: 'search',
+    gsrsearch: query,
+    gsrlimit: '8',
+    prop: 'pageimages|extracts|description',
+    exintro: '1',
+    explaintext: '1',
+    exlimit: '8',
+    pithumbsize: '200',
     format: 'json',
     origin: '*',
   });
 
   try {
-    const response = await fetch(`${WIKI_ACTION_API}?${params}`);
+    const response = await fetch(`${WIKI_ACTION_API}?${params}`, { signal });
     const data = await response.json();
 
-    if (!data.query?.search) return [];
+    if (!data.query?.pages) return [];
 
-    // Get thumbnails and extracts for each result
-    const pageIds = data.query.search.map((r: any) => r.pageid).join('|');
-    
-    const detailParams = new URLSearchParams({
-      action: 'query',
-      pageids: pageIds,
-      prop: 'pageimages|extracts|description',
-      exintro: '1',
-      explaintext: '1',
-      exlimit: '10',
-      pithumbsize: '300',
-      format: 'json',
-      origin: '*',
-    });
+    const pages = Object.values(data.query.pages) as any[];
 
-    const detailResponse = await fetch(`${WIKI_ACTION_API}?${detailParams}`);
-    const detailData = await detailResponse.json();
-
-    const pages = detailData.query?.pages || {};
-
-    return data.query.search.map((result: any) => {
-      const pageDetails = pages[result.pageid] || {};
-      return {
-        pageid: result.pageid,
-        title: result.title,
-        extract: pageDetails.extract?.slice(0, 200) || result.snippet?.replace(/<[^>]*>/g, ''),
-        thumbnail: pageDetails.thumbnail,
-        description: pageDetails.description,
-      };
-    });
+    return pages
+      .sort((a, b) => (a.index || 0) - (b.index || 0))
+      .map((page) => ({
+        pageid: page.pageid,
+        title: page.title,
+        extract: page.extract?.slice(0, 150),
+        thumbnail: page.thumbnail,
+        description: page.description,
+      }));
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return [];
+    }
     console.error('Wikipedia search error:', error);
     return [];
   }
