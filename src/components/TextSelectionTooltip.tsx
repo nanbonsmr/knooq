@@ -180,6 +180,34 @@ export default function TextSelectionTooltip({
     }
   };
 
+  // Calculate safe position to keep tooltip within viewport
+  const getSafePosition = () => {
+    if (!position) return { left: 0, top: 0 };
+    
+    const tooltipWidth = 280; // Approximate max width
+    const padding = 12;
+    const viewportWidth = window.innerWidth;
+    
+    let left = position.x;
+    let top = position.y;
+    
+    // Keep tooltip within horizontal bounds
+    if (left - tooltipWidth / 2 < padding) {
+      left = tooltipWidth / 2 + padding;
+    } else if (left + tooltipWidth / 2 > viewportWidth - padding) {
+      left = viewportWidth - tooltipWidth / 2 - padding;
+    }
+    
+    // If too close to top, show below selection
+    if (top < 60) {
+      top = position.y + 50;
+    }
+    
+    return { left, top };
+  };
+
+  const safePos = getSafePosition();
+
   return (
     <AnimatePresence>
       {isVisible && position && (
@@ -189,10 +217,10 @@ export default function TextSelectionTooltip({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 5, scale: 0.95 }}
           transition={{ duration: 0.15 }}
-          className="fixed z-[100] flex items-center gap-1 p-1.5 rounded-xl bg-popover border border-border shadow-lg"
+          className="fixed z-[100] flex items-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl bg-popover border border-border shadow-lg max-w-[calc(100vw-24px)]"
           style={{
-            left: `${position.x}px`,
-            top: `${position.y}px`,
+            left: `${safePos.left}px`,
+            top: `${safePos.top}px`,
             transform: 'translate(-50%, -100%)',
           }}
         >
@@ -200,44 +228,44 @@ export default function TextSelectionTooltip({
             variant="ghost"
             size="sm"
             onClick={handleCopy}
-            className="h-8 px-3 gap-2 text-sm hover:bg-muted rounded-lg"
+            className="h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-muted rounded-lg"
           >
             {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            {copied ? 'Copied' : 'Copy'}
+            <span className="hidden xs:inline">{copied ? 'Copied' : 'Copy'}</span>
           </Button>
-          <div className="w-px h-5 bg-border/50" />
+          <div className="w-px h-5 bg-border/50 hidden xs:block" />
           <Button
             variant="ghost"
             size="sm"
             onClick={handleHighlight}
-            className="h-8 px-3 gap-2 text-sm hover:bg-primary/20 hover:text-primary rounded-lg relative"
+            className="h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-primary/20 hover:text-primary rounded-lg relative"
           >
             <Highlighter className="w-4 h-4" />
-            Highlight
+            <span className="hidden sm:inline">Highlight</span>
             {!isPro && <Crown className="w-3 h-3 text-primary absolute -top-1 -right-1" />}
           </Button>
-          <div className="w-px h-5 bg-border/50" />
+          <div className="w-px h-5 bg-border/50 hidden xs:block" />
           <Button
             variant="ghost"
             size="sm"
             onClick={handleAddNote}
-            className="h-8 px-3 gap-2 text-sm hover:bg-accent/20 hover:text-accent rounded-lg relative"
+            className="h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent/20 hover:text-accent rounded-lg relative"
           >
             <StickyNote className="w-4 h-4" />
-            Add Note
+            <span className="hidden sm:inline">Note</span>
             {!isPro && <Crown className="w-3 h-3 text-primary absolute -top-1 -right-1" />}
           </Button>
           {onAISuggest && (
             <>
-              <div className="w-px h-5 bg-border/50" />
+              <div className="w-px h-5 bg-border/50 hidden xs:block" />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleAISuggest}
-                className="h-8 px-3 gap-2 text-sm hover:bg-violet-500/20 hover:text-violet-500 rounded-lg"
+                className="h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-violet-500/20 hover:text-violet-500 rounded-lg"
               >
                 <Sparkles className="w-4 h-4" />
-                AI Notes
+                <span className="hidden sm:inline">AI</span>
               </Button>
             </>
           )}
