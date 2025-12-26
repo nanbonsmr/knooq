@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter, StickyNote, MessageSquare, FileText, Download } from 'lucide-react';
+import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter, StickyNote, MessageSquare, FileText, Download, HelpCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 const DODO_PRODUCTS = {
   monthly: 'pdt_0NUsdiOjfNaWrdRszIF3G',
@@ -114,6 +120,33 @@ export default function PricingPage() {
       icon: Download,
       title: 'Export Notes',
       description: 'Export your notes and highlights to PDF or text files for offline use.',
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "What happens after I subscribe to Pro?",
+      answer: "Once you subscribe, all Pro features are instantly unlocked. You can start highlighting text, using AI features, and syncing your notes across devices immediately.",
+    },
+    {
+      question: "Can I cancel my subscription anytime?",
+      answer: "Yes, you can cancel your subscription at any time. You will continue to have access to Pro features until the end of your current billing period.",
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer: "We accept all major credit cards, debit cards, and various local payment methods through our secure payment provider, Dodo Payments.",
+    },
+    {
+      question: "Is there a free trial available?",
+      answer: "While we do not offer a free trial, you can explore the free tier to get familiar with the app. If Pro is not right for you, you can cancel within the first 7 days for a full refund.",
+    },
+    {
+      question: "Will my data be saved if I cancel?",
+      answer: "Yes, your notes and highlights will be preserved even if you cancel. However, you will not be able to add new highlights or use AI features until you resubscribe.",
+    },
+    {
+      question: "How does the yearly billing work?",
+      answer: "With yearly billing, you pay once per year and save 20% compared to monthly billing. The full amount ($95.88) is charged upfront for the entire year.",
     },
   ];
 
@@ -299,11 +332,49 @@ export default function PricingPage() {
           </div>
         </motion.div>
 
+        {/* FAQ Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-24 max-w-3xl mx-auto"
+        >
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 text-muted-foreground mb-6">
+              <HelpCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">FAQ</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-muted-foreground">
+              Got questions? We have answers.
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="glass-card rounded-2xl px-6 border-none"
+              >
+                <AccordionTrigger className="text-left font-medium hover:no-underline py-5">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-5">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+
         {/* Trust section */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.7 }}
           className="text-center text-sm text-muted-foreground mt-16"
         >
           Cancel anytime. Secure payment powered by Dodo Payments.
