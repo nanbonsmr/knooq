@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown, WifiOff } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown, WifiOff, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,11 @@ export default function Header() {
     icon: <BookOpen className="w-5 h-5" />,
     label: 'Notes',
     active: location.pathname === '/notes'
+  }, {
+    to: '/offline',
+    icon: <Download className="w-5 h-5" />,
+    label: 'Offline',
+    active: location.pathname === '/offline'
   }];
   return <>
       <motion.header initial={{
