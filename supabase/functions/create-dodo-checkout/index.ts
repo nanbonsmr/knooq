@@ -22,9 +22,8 @@ serve(async (req) => {
       throw new Error("productId and userId are required");
     }
 
-    // Use test mode - user confirmed they are in test mode
-    // Dodo test keys may have various prefixes, so we use test endpoint
-    const baseUrl = "https://test.dodopayments.com";
+    // Live mode - using production Dodo Payments API
+    const baseUrl = "https://api.dodopayments.com";
 
     console.log("Creating Dodo checkout for:", { productId, userId, userEmail, baseUrl });
 

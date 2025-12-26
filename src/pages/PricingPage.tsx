@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/accordion';
 
 const DODO_PRODUCTS = {
-  monthly: 'pdt_0NUsdiOjfNaWrdRszIF3G',
-  yearly: 'pdt_0NUsdwQNbzZqB4N10dNso',
+  monthly: 'pdt_0NUvE30dvFbUTCMIRDUYO',
+  yearly: 'pdt_0NUvDsq53BdSVVfMmFzZy',
 };
 
 export default function PricingPage() {
