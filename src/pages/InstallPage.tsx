@@ -116,28 +116,31 @@ export default function InstallPage() {
               </p>
             </motion.div>
           ) : (
-            <>
-              {/* Install Button (for supported browsers) */}
-              {deferredPrompt && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="glass-card rounded-2xl p-6 sm:p-8 text-center mb-8"
+          <>
+              {/* Install Button - Always show prominently */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="glass-card rounded-2xl p-6 sm:p-8 text-center mb-8"
+              >
+                <Button
+                  onClick={handleInstallClick}
+                  size="lg"
+                  disabled={!deferredPrompt}
+                  className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 disabled:opacity-50"
                 >
-                  <Button
-                    onClick={handleInstallClick}
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6"
-                  >
-                    <Download className="w-5 h-5 mr-2" />
-                    Install knooq
-                  </Button>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-4">
-                    Click the button above to install the app directly.
-                  </p>
-                </motion.div>
-              )}
+                  <Download className="w-5 h-5 mr-2" />
+                  {deferredPrompt ? 'Install knooq Now' : 'Install knooq'}
+                </Button>
+                <p className="text-muted-foreground text-xs sm:text-sm mt-4">
+                  {deferredPrompt 
+                    ? 'Click the button above to install the app directly.'
+                    : isIOS 
+                      ? 'Follow the instructions below to install on iOS.'
+                      : 'Use your browser menu to install, or follow the instructions below.'}
+                </p>
+              </motion.div>
 
               {/* iOS Instructions */}
               {isIOS && (
