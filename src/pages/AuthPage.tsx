@@ -110,17 +110,17 @@ export default function AuthPage() {
       {/* Back to Home */}
       <Link
         to="/"
-        className="absolute top-6 left-6 z-20 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        <span className="text-sm font-medium">Back to Home</span>
+        <span className="text-sm font-medium hidden xs:inline">Back to Home</span>
       </Link>
 
       {/* Animated background elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-52 sm:w-80 h-52 sm:h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       {/* Left panel - Branding */}
@@ -191,20 +191,20 @@ export default function AuthPage() {
       </motion.div>
 
       {/* Right panel - Auth form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 relative z-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-16 sm:py-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="glass-card rounded-3xl p-8 md:p-10">
+          <div className="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10">
             {/* Mobile logo */}
-            <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-primary-foreground" />
+            <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold gradient-text">Knooq</span>
+              <span className="text-xl sm:text-2xl font-bold gradient-text">Knooq</span>
             </div>
 
             <AnimatePresence mode="wait">
@@ -215,52 +215,52 @@ export default function AuthPage() {
                 exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <h2 className="text-2xl font-bold mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold mb-1.5 sm:mb-2">
                   {isLogin ? 'Welcome back' : 'Create account'}
                 </h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
                   {isLogin 
                     ? 'Sign in to continue your learning journey' 
                     : 'Start your knowledge exploration today'}
                 </p>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
                       Email address
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className={`pl-12 h-12 bg-secondary/50 border-secondary focus:border-primary transition-colors ${
+                        className={`pl-10 sm:pl-12 h-11 sm:h-12 bg-secondary/50 border-secondary focus:border-primary transition-colors text-sm sm:text-base ${
                           errors.email ? 'border-destructive' : ''
                         }`}
                         disabled={isSubmitting}
                       />
                     </div>
                     {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
+                      <p className="text-xs sm:text-sm text-destructive">{errors.email}</p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className={`pl-12 pr-12 h-12 bg-secondary/50 border-secondary focus:border-primary transition-colors ${
+                        className={`pl-10 sm:pl-12 pr-10 sm:pr-12 h-11 sm:h-12 bg-secondary/50 border-secondary focus:border-primary transition-colors text-sm sm:text-base ${
                           errors.password ? 'border-destructive' : ''
                         }`}
                         disabled={isSubmitting}
@@ -268,34 +268,34 @@ export default function AuthPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                       </button>
                     </div>
                     {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password}</p>
+                      <p className="text-xs sm:text-sm text-destructive">{errors.password}</p>
                     )}
                   </div>
 
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground font-semibold group"
+                    className="w-full h-11 sm:h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground font-semibold group text-sm sm:text-base"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         {isLogin ? 'Sign in' : 'Create account'}
-                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </Button>
                 </form>
 
-                <div className="mt-8 text-center">
-                  <p className="text-muted-foreground">
+                <div className="mt-6 sm:mt-8 text-center">
+                  <p className="text-sm text-muted-foreground">
                     {isLogin ? "Don't have an account?" : 'Already have an account?'}
                     <button
                       type="button"
@@ -313,7 +313,7 @@ export default function AuthPage() {
             </AnimatePresence>
           </div>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
+          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-6 px-4">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </motion.div>
