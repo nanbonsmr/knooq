@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Tag, Search, StickyNote, Quote, GripVertical } from 'lucide-react';
-import { useStore, Note } from '@/store/useStore';
+import { Plus, Trash2, Tag, Search, StickyNote, Quote, GripVertical, Loader2 } from 'lucide-react';
+import { useNotes } from '@/hooks/useNotes';
+import { Note } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ interface StudyWorkspaceProps {
 }
 
 export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspaceProps) {
-  const { notes, addNote, updateNote, deleteNote } = useStore();
+  const { notes, isLoading, isSyncing, addNote, updateNote, deleteNote } = useNotes(articleTitle, articleId);
   const [newNoteContent, setNewNoteContent] = useState('');
   const [newTags, setNewTags] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,48 +23,33 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
   const [draggedText, setDraggedText] = useState<string | null>(null);
 
   const filteredNotes = notes.filter((note) => {
-    const matchesArticle = articleId ? note.articleId === articleId : true;
     const matchesSearch = searchQuery
       ? note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
-    return matchesArticle && matchesSearch;
+    return matchesSearch;
   });
 
-  // Listen for drag events
-  useEffect(() => {
-    const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-    };
+  // Handle drop events for dragged text
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
-    const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-      const text = e.dataTransfer?.getData('text/plain');
-      if (text) {
-        setDraggedText(text);
-        setNewNoteContent(text);
-        setIsAddingNote(true);
-      }
-    };
-
-    const workspace = document.getElementById('study-workspace');
-    if (workspace) {
-      workspace.addEventListener('dragover', handleDragOver);
-      workspace.addEventListener('drop', handleDrop);
-      return () => {
-        workspace.removeEventListener('dragover', handleDragOver);
-        workspace.removeEventListener('drop', handleDrop);
-      };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const text = e.dataTransfer?.getData('text/plain');
+    if (text) {
+      setDraggedText(text);
+      setNewNoteContent(text);
+      setIsAddingNote(true);
     }
-  }, []);
+  };
 
-  const handleAddNote = (highlightedText?: string) => {
+  const handleAddNote = async (highlightedText?: string) => {
     const content = highlightedText || newNoteContent;
     if (!content.trim()) return;
 
-    addNote({
-      articleTitle: articleTitle || 'General',
-      articleId: articleId || 'general',
+    await addNote({
       content,
       highlightedText: highlightedText || draggedText || undefined,
       tags: newTags.split(',').map((t) => t.trim()).filter(Boolean),
@@ -76,7 +62,12 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
   };
 
   return (
-    <div id="study-workspace" className="flex flex-col h-full bg-background/50">
+    <div 
+      id="study-workspace" 
+      className="flex flex-col h-full bg-background/50"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/30 glass">
         <div className="flex items-center gap-2">
@@ -85,6 +76,7 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
           <Badge variant="secondary" className="text-xs">
             {filteredNotes.length}
           </Badge>
+          {isSyncing && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
         </div>
       </div>
 
@@ -145,7 +137,8 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => handleAddNote()} className="flex-1">
+                <Button onClick={() => handleAddNote()} className="flex-1" disabled={isSyncing}>
+                  {isSyncing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                   Save Note
                 </Button>
                 <Button
@@ -178,7 +171,11 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
       {/* Notes List */}
       <ScrollArea className="flex-1 px-3 sm:px-4">
         <div className="space-y-2 sm:space-y-3 pb-4">
-          {filteredNotes.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+          ) : filteredNotes.length === 0 ? (
             <div className="text-center py-12">
               <StickyNote className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
               <p className="text-muted-foreground">No notes yet</p>
@@ -194,6 +191,7 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
                 index={index}
                 onUpdate={updateNote}
                 onDelete={deleteNote}
+                isSyncing={isSyncing}
               />
             ))
           )}
@@ -206,18 +204,30 @@ export default function StudyWorkspace({ articleTitle, articleId }: StudyWorkspa
 interface StudyNoteCardProps {
   note: Note;
   index: number;
-  onUpdate: (id: string, content: Partial<Note>) => void;
+  onUpdate: (id: string, content: string) => void;
   onDelete: (id: string) => void;
+  isSyncing?: boolean;
 }
 
-function StudyNoteCard({ note, index, onUpdate, onDelete }: StudyNoteCardProps) {
+function StudyNoteCard({ note, index, onUpdate, onDelete, isSyncing }: StudyNoteCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(note.content);
 
   const handleSave = () => {
-    onUpdate(note.id, { content: editContent });
+    onUpdate(note.id, editContent);
     setIsEditing(false);
   };
+
+  // Parse content for quoted text
+  const parseContent = (content: string) => {
+    const quoteMatch = content.match(/^\[Quote: "(.+?)"\]\n\n(.*)$/s);
+    if (quoteMatch) {
+      return { quote: quoteMatch[1], text: quoteMatch[2] };
+    }
+    return { quote: note.highlightedText, text: content };
+  };
+
+  const { quote, text } = parseContent(note.content);
 
   return (
     <motion.div
@@ -226,10 +236,10 @@ function StudyNoteCard({ note, index, onUpdate, onDelete }: StudyNoteCardProps) 
       transition={{ delay: index * 0.03 }}
       className="p-4 rounded-xl bg-secondary/30 border border-border/30 group hover:border-primary/20 transition-colors"
     >
-      {note.highlightedText && (
+      {quote && (
         <div className="p-2 rounded-lg bg-primary/5 border-l-2 border-primary mb-3">
           <p className="text-xs text-muted-foreground italic line-clamp-2">
-            "{note.highlightedText}"
+            "{quote}"
           </p>
         </div>
       )}
@@ -243,16 +253,19 @@ function StudyNoteCard({ note, index, onUpdate, onDelete }: StudyNoteCardProps) 
               className="min-h-16 bg-transparent border-border/30 resize-none text-sm"
             />
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleSave}>Save</Button>
+              <Button size="sm" onClick={handleSave} disabled={isSyncing}>Save</Button>
               <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
             </div>
           </div>
         ) : (
           <p
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              setEditContent(note.content);
+              setIsEditing(true);
+            }}
             className="text-sm text-foreground/90 cursor-pointer hover:text-foreground transition-colors flex-1"
           >
-            {note.content}
+            {text || note.content}
           </p>
         )}
         <Button
@@ -260,6 +273,7 @@ function StudyNoteCard({ note, index, onUpdate, onDelete }: StudyNoteCardProps) 
           size="icon"
           onClick={() => onDelete(note.id)}
           className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+          disabled={isSyncing}
         >
           <Trash2 className="w-3 h-3 text-destructive" />
         </Button>
