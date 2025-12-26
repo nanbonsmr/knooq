@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Highlighter, StickyNote, Sparkles, Copy, Check } from 'lucide-react';
+import { Highlighter, StickyNote, Sparkles, Copy, Check, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Link } from 'react-router-dom';
 
 interface TextSelectionTooltipProps {
   containerRef: React.RefObject<HTMLElement>;
@@ -22,6 +24,7 @@ export default function TextSelectionTooltip({
   const [isVisible, setIsVisible] = useState(false);
   const [copied, setCopied] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const { isPro } = useSubscription();
 
   const updateTooltipPosition = useCallback(() => {
     const selection = window.getSelection();
@@ -123,6 +126,15 @@ export default function TextSelectionTooltip({
   }, [updateTooltipPosition, onHighlight, onAddNote]);
 
   const handleHighlight = () => {
+    if (!isPro) {
+      toast.error('Upgrade to Pro to use highlights', {
+        action: {
+          label: 'Upgrade',
+          onClick: () => window.location.href = '/pricing',
+        },
+      });
+      return;
+    }
     if (selectedText) {
       onHighlight(selectedText);
       setIsVisible(false);
@@ -131,6 +143,15 @@ export default function TextSelectionTooltip({
   };
 
   const handleAddNote = () => {
+    if (!isPro) {
+      toast.error('Upgrade to Pro to add notes', {
+        action: {
+          label: 'Upgrade',
+          onClick: () => window.location.href = '/pricing',
+        },
+      });
+      return;
+    }
     if (selectedText) {
       onAddNote(selectedText);
       setIsVisible(false);
@@ -189,20 +210,22 @@ export default function TextSelectionTooltip({
             variant="ghost"
             size="sm"
             onClick={handleHighlight}
-            className="h-8 px-3 gap-2 text-sm hover:bg-primary/20 hover:text-primary rounded-lg"
+            className="h-8 px-3 gap-2 text-sm hover:bg-primary/20 hover:text-primary rounded-lg relative"
           >
             <Highlighter className="w-4 h-4" />
             Highlight
+            {!isPro && <Crown className="w-3 h-3 text-primary absolute -top-1 -right-1" />}
           </Button>
           <div className="w-px h-5 bg-border/50" />
           <Button
             variant="ghost"
             size="sm"
             onClick={handleAddNote}
-            className="h-8 px-3 gap-2 text-sm hover:bg-accent/20 hover:text-accent rounded-lg"
+            className="h-8 px-3 gap-2 text-sm hover:bg-accent/20 hover:text-accent rounded-lg relative"
           >
             <StickyNote className="w-4 h-4" />
             Add Note
+            {!isPro && <Crown className="w-3 h-3 text-primary absolute -top-1 -right-1" />}
           </Button>
           {onAISuggest && (
             <>
