@@ -75,7 +75,7 @@ export default function OfflineArticlesPage() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-20">
+      <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-28 md:pb-20">
         {/* Back button */}
         <Button
           variant="ghost"
