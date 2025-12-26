@@ -14,6 +14,7 @@ import PricingPage from "./pages/PricingPage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFound from "./pages/NotFound";
 import MobileFAB from "./components/MobileFAB";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<ExplorePage />} />
               <Route path="/auth" element={<AuthPage />} />
