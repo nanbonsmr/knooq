@@ -523,11 +523,18 @@ export default function ArticlePage() {
             >
               <div
                 ref={articleContentRef}
-                className="wiki-content prose prose-invert prose-lg max-w-none select-text pr-4"
+                className={`wiki-content prose prose-invert prose-lg max-w-none select-text pr-4 ${
+                  isStudyMode ? 'cursor-grab active:cursor-grabbing' : ''
+                }`}
                 dangerouslySetInnerHTML={{ __html: highlightedContent() }}
                 draggable={isStudyMode}
                 onDragStart={handleDragStart}
               />
+              {isStudyMode && (
+                <p className="text-xs text-muted-foreground text-center mt-4 py-2">
+                  💡 Tip: Select text and drag it to the Study Notes panel to create a note
+                </p>
+              )}
             </div>
           )}
         </motion.article>
