@@ -22,13 +22,13 @@ serve(async (req) => {
       throw new Error("productId and userId are required");
     }
 
-    // Detect test mode based on API key prefix
-    const isTestMode = dodoApiKey.startsWith("sk_test_");
+    // Detect test mode - Dodo uses "test_" prefix for test API keys
+    const isTestMode = dodoApiKey.includes("test");
     const baseUrl = isTestMode 
       ? "https://test.dodopayments.com" 
       : "https://live.dodopayments.com";
 
-    console.log("Creating Dodo checkout for:", { productId, userId, userEmail, isTestMode });
+    console.log("Creating Dodo checkout for:", { productId, userId, userEmail, isTestMode, baseUrl, keyPrefix: dodoApiKey.substring(0, 10) });
 
     const origin = req.headers.get("origin") || "https://knooq.lovable.app";
 
