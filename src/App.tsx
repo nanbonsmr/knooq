@@ -15,9 +15,12 @@ import DashboardPage from "./pages/DashboardPage";
 import InstallPage from "./pages/InstallPage";
 import OfflineArticlesPage from "./pages/OfflineArticlesPage";
 import NotFound from "./pages/NotFound";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import ScrollToTop from "./components/ScrollToTop";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -30,18 +33,25 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<ExplorePage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/install" element={<InstallPage />} />
-              <Route path="/offline" element={<OfflineArticlesPage />} />
-              <Route path="/article/:title" element={<ArticlePage />} />
-              <Route path="/bookmarks" element={<BookmarksPage />} />
-              <Route path="/notes" element={<NotesPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="flex flex-col min-h-screen">
+              <div className="flex-1">
+                <Routes>
+                  <Route path="/" element={<ExplorePage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/install" element={<InstallPage />} />
+                  <Route path="/offline" element={<OfflineArticlesPage />} />
+                  <Route path="/article/:title" element={<ArticlePage />} />
+                  <Route path="/bookmarks" element={<BookmarksPage />} />
+                  <Route path="/notes" element={<NotesPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <Footer />
+            </div>
             <MobileBottomNav />
             <PWAInstallBanner />
           </BrowserRouter>
