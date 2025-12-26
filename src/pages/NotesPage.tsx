@@ -108,7 +108,7 @@ export default function NotesPage() {
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-[150px]" />
       </div>
 
-      <main className="relative z-10 container mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-20">
+      <main className="relative z-10 container mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-28 md:pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

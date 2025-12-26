@@ -15,7 +15,7 @@ import DashboardPage from "./pages/DashboardPage";
 import InstallPage from "./pages/InstallPage";
 import OfflineArticlesPage from "./pages/OfflineArticlesPage";
 import NotFound from "./pages/NotFound";
-import MobileFAB from "./components/MobileFAB";
+import MobileBottomNav from "./components/MobileBottomNav";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -41,7 +41,7 @@ const App = () => (
               <Route path="/notes" element={<NotesPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <MobileFAB />
+            <MobileBottomNav />
           </BrowserRouter>
         </TooltipProvider>
       </SubscriptionProvider>

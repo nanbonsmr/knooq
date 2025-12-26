@@ -516,8 +516,8 @@ export default function ExplorePage() {
             </div>
           </section>}
 
-        {/* Footer gradient */}
-        <div className="h-32 bg-gradient-to-t from-background to-transparent" />
+        {/* Footer gradient with extra padding for mobile nav */}
+        <div className="h-32 md:h-32 pb-20 md:pb-0 bg-gradient-to-t from-background to-transparent" />
       </main>
     </div>;
 }
