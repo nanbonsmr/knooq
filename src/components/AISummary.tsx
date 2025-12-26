@@ -70,7 +70,7 @@ export default function AISummary({ title, content }: AISummaryProps) {
                   className="w-full gap-2 border-dashed"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Generate TL;DR
+                  Generate
                 </Button>
               )}
 
