@@ -8,9 +8,10 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-const PADDLE_PRICES = {
-  monthly: 'pri_01kcxr069v4z5xwt448kve6arz',
-  yearly: 'pri_01kcxr12246ykwx4n2m4qz25yx',
+// Dodo Payments product IDs - replace with your actual product IDs from Dodo dashboard
+const DODO_PRODUCTS = {
+  monthly: 'pdt_monthly_pro', // Replace with actual Dodo product ID
+  yearly: 'pdt_yearly_pro',   // Replace with actual Dodo product ID
 };
 
 export default function PricingPage() {
@@ -38,9 +39,9 @@ export default function PricingPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-paddle-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-dodo-checkout', {
         body: {
-          priceId: PADDLE_PRICES[billingCycle],
+          productId: DODO_PRODUCTS[billingCycle],
           userId: user.id,
           userEmail: user.email,
         },
@@ -226,7 +227,7 @@ export default function PricingPage() {
           transition={{ delay: 0.4 }}
           className="text-center text-sm text-muted-foreground mt-12"
         >
-          Cancel anytime. Secure payment powered by Paddle.
+          Cancel anytime. Secure payment powered by Dodo Payments.
         </motion.p>
       </div>
     </div>
