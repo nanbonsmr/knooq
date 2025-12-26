@@ -25,6 +25,7 @@ import {
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
 import StudyWorkspace from '@/components/StudyWorkspace';
+import MobileStudyMode from '@/components/MobileStudyMode';
 import ImageLightbox from '@/components/ImageLightbox';
 import TableOfContents from '@/components/TableOfContents';
 import TextSelectionTooltip from '@/components/TextSelectionTooltip';
@@ -789,26 +790,42 @@ export default function ArticlePage() {
       </div>
 
       {isStudyMode ? (
-        /* Study Mode - Split View */
+        /* Study Mode - Desktop: Split View, Mobile: Swipeable Panels */
         <main className="relative z-10 pt-20 h-screen">
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel defaultSize={60} minSize={40}>
-              <div className="h-full overflow-auto glass border-r border-border/30">
-                <ArticleContent />
-              </div>
-            </ResizablePanel>
-            
-            <ResizableHandle withHandle className="bg-border/30 hover:bg-primary/30 transition-colors" />
-            
-            <ResizablePanel defaultSize={40} minSize={25}>
-              <div className="h-full glass">
+          {/* Desktop Study Mode */}
+          <div className="hidden md:block h-full">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              <ResizablePanel defaultSize={60} minSize={40}>
+                <div className="h-full overflow-auto glass border-r border-border/30">
+                  <ArticleContent />
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle className="bg-border/30 hover:bg-primary/30 transition-colors" />
+              
+              <ResizablePanel defaultSize={40} minSize={25}>
+                <div className="h-full glass">
+                  <StudyWorkspace 
+                    articleTitle={article?.title} 
+                    articleId={String(article?.pageid)} 
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
+          
+          {/* Mobile Study Mode */}
+          <div className="md:hidden h-full">
+            <MobileStudyMode
+              articleContent={<ArticleContent />}
+              notesPanel={
                 <StudyWorkspace 
                   articleTitle={article?.title} 
                   articleId={String(article?.pageid)} 
                 />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+              }
+            />
+          </div>
         </main>
       ) : (
         /* Normal Mode */
