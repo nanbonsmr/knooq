@@ -67,7 +67,7 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ 
-      checkoutUrl: data.url,
+      checkoutUrl: data.checkout_url,
       sessionId: data.session_id 
     }), {
       status: 200,
