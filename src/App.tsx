@@ -12,6 +12,7 @@ import NotesPage from "./pages/NotesPage";
 import AuthPage from "./pages/AuthPage";
 import PricingPage from "./pages/PricingPage";
 import DashboardPage from "./pages/DashboardPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 import MobileFAB from "./components/MobileFAB";
 import ScrollToTop from "./components/ScrollToTop";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/install" element={<InstallPage />} />
               <Route path="/article/:title" element={<ArticlePage />} />
               <Route path="/bookmarks" element={<BookmarksPage />} />
               <Route path="/notes" element={<NotesPage />} />
