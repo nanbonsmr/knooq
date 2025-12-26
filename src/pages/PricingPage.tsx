@@ -8,10 +8,9 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Dodo Payments product IDs - replace with your actual product IDs from Dodo dashboard
 const DODO_PRODUCTS = {
-  monthly: 'pdt_monthly_pro', // Replace with actual Dodo product ID
-  yearly: 'pdt_yearly_pro',   // Replace with actual Dodo product ID
+  monthly: 'pdt_0NUsdiOjfNaWrdRszIF3G',
+  yearly: 'pdt_0NUsdwQNbzZqB4N10dNso',
 };
 
 export default function PricingPage() {
