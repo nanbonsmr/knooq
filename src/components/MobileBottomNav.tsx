@@ -32,9 +32,9 @@ export default function MobileBottomNav() {
     },
     {
       icon: Download,
-      label: 'Offline',
-      path: '/offline',
-      active: location.pathname === '/offline',
+      label: 'Install',
+      path: '/install',
+      active: location.pathname === '/install',
     },
     {
       icon: User,
