@@ -30,6 +30,8 @@ import AIChatAssistant from '@/components/AIChatAssistant';
 import AINoteSuggestions from '@/components/AINoteSuggestions';
 import { ProGate, ProBadge } from '@/components/ProGate';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useHighlights } from '@/hooks/useHighlights';
+import { useNotes } from '@/hooks/useNotes';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -61,12 +63,17 @@ export default function ArticlePage() {
     isNotePanelOpen,
     isStudyMode,
     setStudyMode,
-    addNote,
-    addHighlight,
-    removeHighlight,
-    highlights,
     addBreadcrumb
   } = useStore();
+
+  // Use synced highlights and notes hooks
+  const { 
+    highlights, 
+    addHighlight: addHighlightToDb, 
+    removeHighlight: removeHighlightFromDb 
+  } = useHighlights(article?.title, article ? String(article.pageid) : undefined);
+  
+  const { addNote: addNoteToDb } = useNotes(article?.title, article ? String(article.pageid) : undefined);
 
   const { isPro } = useSubscription();
   const bookmarked = article ? isBookmarked(article.pageid) : false;
@@ -76,9 +83,7 @@ export default function ArticlePage() {
   const [aiSuggestText, setAiSuggestText] = useState<string | null>(null);
 
   // Get article highlights count
-  const articleHighlightsCount = article 
-    ? highlights.filter(h => h.articleId === String(article.pageid)).length
-    : 0;
+  const articleHighlightsCount = highlights.length;
 
   useEffect(() => {
     async function fetchArticle() {
@@ -148,16 +153,12 @@ export default function ArticlePage() {
     }
   }, [htmlContent]);
 
-  // Apply highlights to content
-  const articleHighlights = article 
-    ? highlights.filter(h => h.articleId === String(article.pageid))
-    : [];
-
+  // Apply highlights to content - highlights from hook are already filtered by article
   const highlightedContent = useCallback(() => {
-    if (!htmlContent || articleHighlights.length === 0) return htmlContent;
+    if (!htmlContent || highlights.length === 0) return htmlContent;
     
     let content = htmlContent;
-    articleHighlights.forEach((highlight) => {
+    highlights.forEach((highlight) => {
       const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(${escapedText})`, 'gi');
       content = content.replace(
@@ -166,7 +167,7 @@ export default function ArticlePage() {
       );
     });
     return content;
-  }, [htmlContent, articleHighlights]);
+  }, [htmlContent, highlights]);
 
   const handleBookmark = () => {
     if (!article) return;
@@ -220,37 +221,26 @@ export default function ArticlePage() {
   // Handle text highlight
   const handleHighlight = useCallback((text: string) => {
     if (article) {
-      addHighlight({
-        articleId: String(article.pageid),
+      addHighlightToDb({
         text,
         color: 'yellow',
       });
-      toast({
-        title: 'Text highlighted',
-        description: `"${text.slice(0, 50)}${text.length > 50 ? '...' : ''}"`,
-      });
     }
-  }, [article, addHighlight]);
+  }, [article, addHighlightToDb]);
 
   // Handle add note from selection
   const handleAddNoteFromSelection = useCallback((text: string) => {
     if (article) {
-      addNote({
-        articleTitle: article.title,
-        articleId: String(article.pageid),
+      addNoteToDb({
         content: '',
         highlightedText: text,
         tags: [],
-      });
-      toast({
-        title: 'Note added',
-        description: 'Highlighted text saved to notes',
       });
       if (!isStudyMode) {
         setNotePanelOpen(true);
       }
     }
-  }, [article, addNote, isStudyMode, setNotePanelOpen]);
+  }, [article, addNoteToDb, isStudyMode, setNotePanelOpen]);
 
   // Handle image clicks for lightbox
   const handleImageClick = useCallback((e: MouseEvent) => {
@@ -303,12 +293,11 @@ export default function ArticlePage() {
 
   const handleDeleteHighlight = useCallback(() => {
     if (activeHighlightId) {
-      removeHighlight(activeHighlightId);
+      removeHighlightFromDb(activeHighlightId);
       setActiveHighlightId(null);
       setHighlightTooltipPos(null);
-      toast({ title: 'Highlight removed' });
     }
-  }, [activeHighlightId, removeHighlight]);
+  }, [activeHighlightId, removeHighlightFromDb]);
 
   // Navigate to a specific highlight in the article
   const handleNavigateToHighlight = useCallback((highlightId: string) => {
@@ -570,6 +559,7 @@ export default function ArticlePage() {
       {!isStudyMode && (
         <HighlightsPanel
           articleId={String(article?.pageid)}
+          articleTitle={article?.title}
           isOpen={isHighlightsPanelOpen}
           onClose={() => setIsHighlightsPanelOpen(false)}
           onNavigateToHighlight={handleNavigateToHighlight}

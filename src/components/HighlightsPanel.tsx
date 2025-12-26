@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Highlighter, Trash2, Search, ChevronRight, Download } from 'lucide-react';
-import { useStore, Highlight } from '@/store/useStore';
+import { X, Highlighter, Trash2, Search, ChevronRight, Download, Loader2 } from 'lucide-react';
+import { useHighlights } from '@/hooks/useHighlights';
+import { Highlight } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -11,31 +12,31 @@ import { exportHighlightsOnly, downloadMarkdown } from '@/lib/export';
 
 interface HighlightsPanelProps {
   articleId?: string;
+  articleTitle?: string;
   isOpen: boolean;
   onClose: () => void;
   onNavigateToHighlight: (highlightId: string) => void;
 }
 
 export default function HighlightsPanel({ 
-  articleId, 
+  articleId,
+  articleTitle,
   isOpen, 
   onClose,
   onNavigateToHighlight 
 }: HighlightsPanelProps) {
-  const { highlights, removeHighlight } = useStore();
+  const { highlights, removeHighlight, isLoading, isSyncing } = useHighlights(articleTitle, articleId);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const articleHighlights = highlights.filter((h) => {
-    const matchesArticle = articleId ? h.articleId === articleId : true;
+  const filteredHighlights = highlights.filter((h) => {
     const matchesSearch = searchQuery
       ? h.text.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    return matchesArticle && matchesSearch;
+    return matchesSearch;
   });
 
-  const handleDelete = (id: string) => {
-    removeHighlight(id);
-    toast({ title: 'Highlight removed' });
+  const handleDelete = async (id: string) => {
+    await removeHighlight(id);
   };
 
   const handleNavigate = (highlight: Highlight) => {
@@ -60,16 +61,17 @@ export default function HighlightsPanel({
                 <Highlighter className="w-5 h-5 text-yellow-500" />
                 <h2 className="font-semibold text-lg">Highlights</h2>
                 <Badge variant="secondary" className="text-xs">
-                  {articleHighlights.length}
+                  {filteredHighlights.length}
                 </Badge>
+                {isSyncing && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
               </div>
               <div className="flex items-center gap-1">
-                {articleHighlights.length > 0 && (
+                {filteredHighlights.length > 0 && (
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      const markdown = exportHighlightsOnly(articleHighlights);
+                      const markdown = exportHighlightsOnly(filteredHighlights);
                       downloadMarkdown(markdown, 'highlights.md');
                       toast({ title: 'Highlights exported' });
                     }}
@@ -106,22 +108,27 @@ export default function HighlightsPanel({
             {/* Highlights List */}
             <ScrollArea className="flex-1 px-4">
               <div className="space-y-3 pb-4">
-                {articleHighlights.length === 0 ? (
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                ) : filteredHighlights.length === 0 ? (
                   <div className="text-center py-12">
                     <Highlighter className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-muted-foreground">No highlights yet</p>
                     <p className="text-sm text-muted-foreground/60">
-                      Select text and press Ctrl+H to highlight
+                      Select text and click Highlight
                     </p>
                   </div>
                 ) : (
-                  articleHighlights.map((highlight, index) => (
+                  filteredHighlights.map((highlight, index) => (
                     <HighlightCard
                       key={highlight.id}
                       highlight={highlight}
                       index={index}
                       onDelete={handleDelete}
                       onNavigate={handleNavigate}
+                      isSyncing={isSyncing}
                     />
                   ))
                 )}
@@ -139,9 +146,10 @@ interface HighlightCardProps {
   index: number;
   onDelete: (id: string) => void;
   onNavigate: (highlight: Highlight) => void;
+  isSyncing?: boolean;
 }
 
-function HighlightCard({ highlight, index, onDelete, onNavigate }: HighlightCardProps) {
+function HighlightCard({ highlight, index, onDelete, onNavigate, isSyncing }: HighlightCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -179,6 +187,7 @@ function HighlightCard({ highlight, index, onDelete, onNavigate }: HighlightCard
             size="icon"
             onClick={() => onDelete(highlight.id)}
             className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            disabled={isSyncing}
           >
             <Trash2 className="w-3 h-3 text-destructive" />
           </Button>
