@@ -29,10 +29,10 @@ verify_jwt = false
 [functions.ai-suggest-notes]
 verify_jwt = false
 
-[functions.paddle-webhook]
+[functions.create-dodo-checkout]
 verify_jwt = false
 
-[functions.create-paddle-checkout]
+[functions.dodo-webhook]
 verify_jwt = false
 
 [functions.manage-subscription]
