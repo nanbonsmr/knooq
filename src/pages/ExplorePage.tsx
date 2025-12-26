@@ -258,9 +258,7 @@ export default function ExplorePage() {
         </section>
 
         {/* Features Section */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          
-        </section>
+        
 
         {/* Featured Article */}
         <AnimatePresence>
