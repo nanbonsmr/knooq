@@ -171,7 +171,7 @@ export default function PricingPage() {
     },
     {
       question: "How does the yearly billing work?",
-      answer: "With yearly billing, you pay once per year and save 20% compared to monthly billing. The full amount ($95.88) is charged upfront for the entire year.",
+      answer: "With yearly billing, you pay once per year and save 17% compared to monthly billing. The full amount ($199.99) is charged upfront for the entire year.",
     },
   ];
 
@@ -289,11 +289,11 @@ export default function PricingPage() {
             <p className="text-sm text-muted-foreground mb-4 sm:mb-6">Full access to all features</p>
             <div className="mb-4 sm:mb-6">
               <span className="text-3xl sm:text-4xl font-bold">
-                ${billingCycle === 'monthly' ? '9.99' : '7.99'}
+                ${billingCycle === 'monthly' ? '19.99' : '16.66'}
               </span>
               <span className="text-muted-foreground text-sm">/month</span>
               {billingCycle === 'yearly' && (
-                <p className="text-xs sm:text-sm text-accent mt-1">Billed annually ($95.88/year)</p>
+                <p className="text-xs sm:text-sm text-accent mt-1">Billed annually ($199.99/year)</p>
               )}
             </div>
             <Button
