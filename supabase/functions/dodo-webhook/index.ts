@@ -113,28 +113,23 @@ serve(async (req) => {
           const userId = metadata.user_id;
 
           if (userId) {
-            // Check if subscription exists, if not create it
-            const { data: existingSub } = await supabase
-              .from("subscriptions")
-              .select("id")
-              .eq("paddle_subscription_id", data.subscription_id)
-              .maybeSingle();
-
-            if (!existingSub) {
-              console.log("Creating subscription from payment.succeeded event");
-              const { error } = await supabase.from("subscriptions").insert({
+            // Use upsert to avoid duplicate key errors - upsert on paddle_subscription_id
+            console.log("Ensuring subscription exists from payment.succeeded event");
+            const { error } = await supabase.from("subscriptions").upsert(
+              {
                 user_id: userId,
                 paddle_subscription_id: data.subscription_id,
                 paddle_customer_id: data.customer?.customer_id,
                 status: "active",
-                plan_type: "monthly", // Default, will be updated by subscription event
-              });
+                plan_type: "monthly",
+              },
+              { onConflict: "paddle_subscription_id", ignoreDuplicates: true }
+            );
 
-              if (error) {
-                console.error("Error creating subscription from payment:", error);
-              } else {
-                console.log("Subscription created from payment for user:", userId);
-              }
+            if (error) {
+              console.error("Error upserting subscription from payment:", error);
+            } else {
+              console.log("Subscription ensured from payment for user:", userId);
             }
           }
         }
