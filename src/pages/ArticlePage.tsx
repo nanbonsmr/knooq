@@ -14,7 +14,8 @@ import {
   BookOpen,
   X,
   Trash2,
-  Highlighter
+  Highlighter,
+  Crown
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
@@ -344,15 +345,26 @@ export default function ArticlePage() {
         </Button>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
-          {/* Hide study mode on mobile */}
+          {/* Hide study mode on mobile - Pro only */}
           <Button
             variant={isStudyMode ? "default" : "ghost"}
             size="icon"
-            onClick={() => setStudyMode(!isStudyMode)}
-            className="rounded-full hidden sm:flex w-8 h-8 sm:w-10 sm:h-10"
-            title="Study Mode"
+            onClick={() => {
+              if (!isPro) {
+                toast({ 
+                  title: 'Pro Feature', 
+                  description: 'Upgrade to Pro to use Study Mode',
+                  action: <a href="/pricing" className="text-primary hover:underline">Upgrade</a>
+                });
+                return;
+              }
+              setStudyMode(!isStudyMode);
+            }}
+            className="rounded-full hidden sm:flex w-8 h-8 sm:w-10 sm:h-10 relative"
+            title="Study Mode (Pro)"
           >
             <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+            {!isPro && <Crown className="w-3 h-3 text-primary absolute -top-0.5 -right-0.5" />}
           </Button>
           <Button
             variant="ghost"
