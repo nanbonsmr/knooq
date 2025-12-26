@@ -25,8 +25,8 @@ serve(async (req) => {
     // Detect test mode based on API key prefix
     const isTestMode = dodoApiKey.startsWith("sk_test_");
     const baseUrl = isTestMode 
-      ? "https://test.dodopayments.com/v1" 
-      : "https://api.dodopayments.com/v1";
+      ? "https://test.dodopayments.com" 
+      : "https://live.dodopayments.com";
 
     console.log("Creating Dodo checkout for:", { productId, userId, userEmail, isTestMode });
 
