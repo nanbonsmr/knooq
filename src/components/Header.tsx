@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown, CreditCard } from 'lucide-react';
+import { BookOpen, Compass, BookMarked, Menu, X, LogIn, LogOut, User, Crown, LayoutDashboard, ChevronDown, CreditCard, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ export default function Header() {
     { to: '/bookmarks', icon: <BookMarked className="w-5 h-5" />, label: 'Bookmarks', active: location.pathname === '/bookmarks' },
     { to: '/notes', icon: <BookOpen className="w-5 h-5" />, label: 'Notes', active: location.pathname === '/notes' },
     { to: '/pricing', icon: <CreditCard className="w-5 h-5" />, label: 'Pricing', active: location.pathname === '/pricing' },
+    { to: '/install', icon: <Download className="w-5 h-5" />, label: 'Install', active: location.pathname === '/install' },
   ];
 
   return (
