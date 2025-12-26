@@ -28,7 +28,7 @@ serve(async (req) => {
     const isTestMode = dodoApiKey.startsWith("sk_test_");
     const baseUrl = isTestMode 
       ? "https://test.dodopayments.com" 
-      : "https://api.dodopayments.com";
+      : "https://live.dodopayments.com";
 
     let endpoint = `${baseUrl}/subscriptions/${subscriptionId}`;
     let method = "PATCH";
