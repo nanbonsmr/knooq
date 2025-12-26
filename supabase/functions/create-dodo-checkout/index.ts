@@ -23,7 +23,7 @@ serve(async (req) => {
     }
 
     // Live mode - using production Dodo Payments API
-    const baseUrl = "https://api.dodopayments.com";
+    const baseUrl = "https://live.dodopayments.com";
 
     console.log("Creating Dodo checkout for:", { productId, userId, userEmail, baseUrl });
 
