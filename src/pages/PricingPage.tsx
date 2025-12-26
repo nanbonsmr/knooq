@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter, StickyNote, MessageSquare, FileText, Download, HelpCircle, ChevronDown } from 'lucide-react';
+import { Check, Sparkles, ArrowLeft, Crown, Zap, Brain, BookOpen, Cloud, Highlighter, StickyNote, MessageSquare, FileText, Download, HelpCircle, ChevronDown, Shield, CreditCard, RefreshCcw, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -370,14 +370,53 @@ export default function PricingPage() {
           </Accordion>
         </motion.div>
 
-        {/* Trust section */}
+        {/* Trust Indicators */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-24"
+        >
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
+              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                <RefreshCcw className="w-7 h-7 text-accent" />
+              </div>
+              <h4 className="font-semibold mb-1">7-Day Money Back</h4>
+              <p className="text-sm text-muted-foreground">Full refund if not satisfied</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
+              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                <Shield className="w-7 h-7 text-primary" />
+              </div>
+              <h4 className="font-semibold mb-1">Secure Checkout</h4>
+              <p className="text-sm text-muted-foreground">256-bit SSL encryption</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
+              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                <CreditCard className="w-7 h-7 text-accent" />
+              </div>
+              <h4 className="font-semibold mb-1">Cancel Anytime</h4>
+              <p className="text-sm text-muted-foreground">No hidden fees or contracts</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 glass-card rounded-2xl">
+              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                <Lock className="w-7 h-7 text-primary" />
+              </div>
+              <h4 className="font-semibold mb-1">Privacy First</h4>
+              <p className="text-sm text-muted-foreground">Your data stays private</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Footer text */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="text-center text-sm text-muted-foreground mt-16"
+          transition={{ delay: 0.8 }}
+          className="text-center text-sm text-muted-foreground mt-12"
         >
-          Cancel anytime. Secure payment powered by Dodo Payments.
+          Secure payment powered by Dodo Payments.
         </motion.p>
       </div>
     </div>
