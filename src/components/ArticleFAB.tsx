@@ -52,7 +52,7 @@ export default function ArticleFAB({
   ];
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 md:hidden">
+    <div className="fixed bottom-20 left-4 z-40 md:hidden">
       <AnimatePresence>
         {isOpen && (
           <>
@@ -66,7 +66,7 @@ export default function ArticleFAB({
             />
 
             {/* Action items */}
-            <div className="absolute bottom-16 right-0 flex flex-col items-end gap-3">
+            <div className="absolute bottom-16 left-0 flex flex-col items-start gap-3">
               {actions.map((action, index) => (
                 <motion.button
                   key={action.label}
