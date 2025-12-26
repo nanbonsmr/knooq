@@ -11,22 +11,38 @@ export default function SearchBar() {
   const [results, setResults] = useState<WikiSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
   const { setSearchQuery } = useStore();
 
   useEffect(() => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    if (localQuery.trim().length < 2) {
+      setResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const timer = setTimeout(async () => {
-      if (localQuery.trim().length > 2) {
-        setIsLoading(true);
-        const searchResults = await searchWikipedia(localQuery);
+      setIsLoading(true);
+      const searchResults = await searchWikipedia(localQuery, controller.signal);
+      if (!controller.signal.aborted) {
         setResults(searchResults);
         setIsLoading(false);
-      } else {
-        setResults([]);
       }
-    }, 300);
+    }, 150); // Reduced debounce from 300ms to 150ms
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [localQuery]);
 
   const handleSelect = (title: string) => {
