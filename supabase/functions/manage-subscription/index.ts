@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { action, subscriptionId } = await req.json();
-    const paddleApiKey = Deno.env.get("PADDLE_API_KEY");
+    const dodoApiKey = Deno.env.get("DODO_PAYMENTS_API_KEY");
 
-    if (!paddleApiKey) {
-      throw new Error("PADDLE_API_KEY is not configured");
+    if (!dodoApiKey) {
+      throw new Error("DODO_PAYMENTS_API_KEY is not configured");
     }
 
     if (!subscriptionId) {
@@ -24,24 +24,29 @@ serve(async (req) => {
 
     console.log("Managing subscription:", { action, subscriptionId });
 
-    let endpoint = `https://api.paddle.com/subscriptions/${subscriptionId}`;
+    // Determine if we're in test or live mode based on the API key
+    const isTestMode = dodoApiKey.startsWith("sk_test_");
+    const baseUrl = isTestMode 
+      ? "https://test.dodopayments.com" 
+      : "https://api.dodopayments.com";
+
+    let endpoint = `${baseUrl}/subscriptions/${subscriptionId}`;
     let method = "PATCH";
     let body: any = {};
 
     switch (action) {
       case "cancel":
-        body = { effective_from: "next_billing_period" };
-        endpoint = `${endpoint}/cancel`;
-        method = "POST";
+        // Dodo uses PATCH with status update to cancel
+        body = { status: "cancelled" };
+        method = "PATCH";
         break;
       case "pause":
-        body = { effective_from: "next_billing_period" };
-        endpoint = `${endpoint}/pause`;
-        method = "POST";
+        body = { status: "paused" };
+        method = "PATCH";
         break;
       case "resume":
-        endpoint = `${endpoint}/resume`;
-        method = "POST";
+        body = { status: "active" };
+        method = "PATCH";
         break;
       case "get":
         method = "GET";
@@ -50,10 +55,12 @@ serve(async (req) => {
         throw new Error("Invalid action");
     }
 
+    console.log("Calling Dodo API:", { endpoint, method, body });
+
     const fetchOptions: RequestInit = {
       method,
       headers: {
-        "Authorization": `Bearer ${paddleApiKey}`,
+        "Authorization": `Bearer ${dodoApiKey}`,
         "Content-Type": "application/json",
       },
     };
@@ -65,11 +72,11 @@ serve(async (req) => {
     const response = await fetch(endpoint, fetchOptions);
     const data = await response.json();
 
-    console.log("Paddle response:", JSON.stringify(data, null, 2));
+    console.log("Dodo response:", JSON.stringify(data, null, 2));
 
     if (!response.ok) {
-      console.error("Paddle API error:", data);
-      throw new Error(data.error?.detail || "Failed to manage subscription");
+      console.error("Dodo API error:", data);
+      throw new Error(data.message || data.error?.detail || "Failed to manage subscription");
     }
 
     return new Response(JSON.stringify(data), {
