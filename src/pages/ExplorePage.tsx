@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Sparkles, Zap, Loader2, Globe, ArrowRight, Clock, BookOpen, Star } from 'lucide-react';
+import { TrendingUp, Sparkles, Zap, Loader2, Globe, ArrowRight, Clock, BookOpen, Star, Flame } from 'lucide-react';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import TopicCard from '@/components/TopicCard';
 import NotePanel from '@/components/NotePanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getTrendingArticles, getFeaturedArticle, getRandomArticles, WikiSearchResult, WikiArticle } from '@/lib/wikipedia';
+import { getTrendingArticles, getFeaturedArticle, getRandomArticles, getPopularThisWeek, WikiSearchResult, WikiArticle } from '@/lib/wikipedia';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -72,6 +72,7 @@ const categories = [{
 export default function ExplorePage() {
   const [trendingArticles, setTrendingArticles] = useState<WikiSearchResult[]>([]);
   const [featuredArticle, setFeaturedArticle] = useState<WikiArticle | null>(null);
+  const [popularThisWeek, setPopularThisWeek] = useState<WikiSearchResult[]>([]);
   const [randomArticles, setRandomArticles] = useState<WikiSearchResult[]>(fallbackTopics);
   const [isLoading, setIsLoading] = useState(true);
   const [visibleTrending, setVisibleTrending] = useState(8);
@@ -87,9 +88,15 @@ export default function ExplorePage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const [trending, featured, random] = await Promise.all([getTrendingArticles().catch(() => []), getFeaturedArticle().catch(() => null), getRandomArticles(8).catch(() => [])]);
+        const [trending, featured, popular, random] = await Promise.all([
+          getTrendingArticles().catch(() => []), 
+          getFeaturedArticle().catch(() => null), 
+          getPopularThisWeek().catch(() => []),
+          getRandomArticles(8).catch(() => [])
+        ]);
         if (trending.length > 0) setTrendingArticles(trending);
         if (featured) setFeaturedArticle(featured);
+        if (popular.length > 0) setPopularThisWeek(popular);
         if (random.length > 0) setRandomArticles(random);else setRandomArticles(fallbackTopics);
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -322,6 +329,37 @@ export default function ExplorePage() {
               </div>
             </section>}
         </AnimatePresence>
+
+        {/* Popular This Week */}
+        {popularThisWeek.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div className="max-w-7xl mx-auto">
+              <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold">Popular This Week</h2>
+                  <p className="text-sm text-muted-foreground">Most viewed articles over the past 7 days</p>
+                </div>
+              </motion.div>
+
+              <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{
+            once: true
+          }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {popularThisWeek.map((article, index) => <motion.div key={article.pageid} variants={itemVariants}>
+                    <TopicCard article={article} index={index} size="md" />
+                  </motion.div>)}
+              </motion.div>
+            </div>
+          </section>}
 
         {/* Trending Articles */}
         {trendingArticles.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24">

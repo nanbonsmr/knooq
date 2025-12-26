@@ -215,6 +215,91 @@ export async function getTrendingArticles(): Promise<WikiSearchResult[]> {
   }
 }
 
+export async function getPopularThisWeek(): Promise<WikiSearchResult[]> {
+  try {
+    // Get dates for the past 7 days
+    const articles: Map<string, { views: number; title: string }> = new Map();
+    
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      const response = await fetch(
+        `${WIKI_API_BASE}/feed/featured/${year}/${month}/${day}`
+      );
+      
+      if (!response.ok) continue;
+      
+      const data = await response.json();
+      const mostRead = data.mostread?.articles || [];
+      
+      for (const article of mostRead) {
+        if (article.title.startsWith('Special:') || article.title.startsWith('Main_Page')) continue;
+        
+        const existing = articles.get(article.title);
+        if (existing) {
+          existing.views += article.views || 0;
+        } else {
+          articles.set(article.title, {
+            views: article.views || 0,
+            title: article.title,
+          });
+        }
+      }
+    }
+    
+    // Sort by total views and get top 8
+    const topArticles = Array.from(articles.values())
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 8);
+    
+    if (topArticles.length === 0) return [];
+    
+    // Fetch details for these articles
+    const titles = topArticles.map(a => a.title).join('|');
+    
+    const detailParams = new URLSearchParams({
+      action: 'query',
+      titles: titles,
+      prop: 'pageimages|extracts|description',
+      exintro: '1',
+      explaintext: '1',
+      exlimit: '8',
+      pithumbsize: '400',
+      format: 'json',
+      origin: '*',
+    });
+
+    const detailResponse = await fetch(`${WIKI_ACTION_API}?${detailParams}`);
+    const detailData = await detailResponse.json();
+
+    const pages = Object.values(detailData.query?.pages || {}) as any[];
+    
+    // Maintain the order by views
+    const pageMap = new Map(pages.map(p => [p.title, p]));
+    
+    return topArticles
+      .map(article => {
+        const page = pageMap.get(article.title);
+        if (!page || !page.pageid) return null;
+        return {
+          pageid: page.pageid,
+          title: page.title,
+          extract: page.extract?.slice(0, 200),
+          thumbnail: page.thumbnail,
+          description: page.description,
+        } as WikiSearchResult;
+      })
+      .filter((a): a is WikiSearchResult => a !== null);
+  } catch (error) {
+    console.error('Failed to fetch popular this week:', error);
+    return [];
+  }
+}
+
 export async function getRelatedArticles(title: string): Promise<WikiSearchResult[]> {
   const params = new URLSearchParams({
     action: 'query',
