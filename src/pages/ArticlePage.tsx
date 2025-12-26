@@ -32,6 +32,7 @@ import ArticleBreadcrumbs from '@/components/ArticleBreadcrumbs';
 import AISummary from '@/components/AISummary';
 import AIChatAssistant from '@/components/AIChatAssistant';
 import AINoteSuggestions from '@/components/AINoteSuggestions';
+import ArticleFAB from '@/components/ArticleFAB';
 import { ProGate, ProBadge } from '@/components/ProGate';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useHighlights } from '@/hooks/useHighlights';
@@ -711,6 +712,16 @@ export default function ArticlePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Article FAB */}
+      <ArticleFAB
+        highlightsCount={highlights.length}
+        onOpenNotes={() => setNotePanelOpen(true)}
+        onOpenHighlights={() => setIsHighlightsPanelOpen(true)}
+        onToggleStudyMode={() => setStudyMode(!isStudyMode)}
+        isStudyMode={isStudyMode}
+        isPro={isPro}
+      />
 
       {/* Progress bar */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50">
