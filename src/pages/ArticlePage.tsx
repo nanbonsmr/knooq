@@ -18,7 +18,9 @@ import {
   Crown,
   WifiOff,
   Download,
-  CheckCircle2
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Header from '@/components/Header';
 import NotePanel from '@/components/NotePanel';
@@ -36,6 +38,8 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useHighlights } from '@/hooks/useHighlights';
 import { useNotes } from '@/hooks/useNotes';
 import { useOfflineArticles } from '@/hooks/useOfflineArticles';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getArticle, getArticleContent, getRelatedArticles, WikiArticle, WikiSearchResult } from '@/lib/wikipedia';
@@ -85,15 +89,40 @@ export default function ArticlePage() {
   } = useOfflineArticles();
 
   const { isPro } = useSubscription();
+  const isMobile = useIsMobile();
   const bookmarked = article ? isBookmarked(article.pageid) : false;
   const isOfflineCached = article ? isArticleCached(article.title) : false;
   const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
   const [highlightTooltipPos, setHighlightTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [isHighlightsPanelOpen, setIsHighlightsPanelOpen] = useState(false);
   const [aiSuggestText, setAiSuggestText] = useState<string | null>(null);
+  const { recentArticles } = useStore();
 
   // Get article highlights count
   const articleHighlightsCount = highlights.length;
+  
+  // Get navigation articles (recent articles excluding current)
+  const navigationArticles = recentArticles.filter(a => a.title !== article?.title).slice(0, 10);
+  const currentIndex = navigationArticles.findIndex(a => a.title === article?.title);
+  
+  // Swipe navigation handlers
+  const handleSwipeLeft = useCallback(() => {
+    if (navigationArticles.length > 0) {
+      const nextArticle = navigationArticles[0];
+      navigate(`/article/${encodeURIComponent(nextArticle.title)}`);
+      toast({ title: `Navigating to ${nextArticle.title}` });
+    }
+  }, [navigationArticles, navigate]);
+
+  const handleSwipeRight = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  const { swipeHandlers, swipeState } = useSwipeGesture({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    threshold: 100,
+  });
 
   useEffect(() => {
     async function fetchArticle() {
@@ -617,9 +646,52 @@ export default function ArticlePage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background relative"
+      {...(isMobile ? swipeHandlers : {})}
+    >
       <Header />
       {!isStudyMode && <NotePanel articleTitle={article?.title} articleId={String(article?.pageid)} />}
+      
+      {/* Mobile Swipe Indicators */}
+      {isMobile && swipeState.isSwiping && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: Math.min(swipeState.distance / 100, 1) }}
+            exit={{ opacity: 0 }}
+            className={`fixed inset-y-0 z-[60] w-16 flex items-center justify-center pointer-events-none ${
+              swipeState.direction === 'right' ? 'left-0' : 'right-0'
+            }`}
+          >
+            <div className={`p-3 rounded-full glass-card border border-primary/30 ${
+              swipeState.distance >= 100 ? 'bg-primary/20' : 'bg-background/80'
+            }`}>
+              {swipeState.direction === 'right' ? (
+                <ChevronLeft className={`w-6 h-6 ${swipeState.distance >= 100 ? 'text-primary' : 'text-muted-foreground'}`} />
+              ) : (
+                <ChevronRight className={`w-6 h-6 ${swipeState.distance >= 100 ? 'text-primary' : 'text-muted-foreground'}`} />
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+      
+      {/* Mobile swipe hint - show once */}
+      {isMobile && !isLoading && article && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ delay: 2 }}
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full glass-card border border-border/50 text-xs text-muted-foreground flex items-center gap-2"
+          onClick={(e) => (e.currentTarget.style.display = 'none')}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Swipe to navigate</span>
+          <ChevronRight className="w-4 h-4" />
+        </motion.div>
+      )}
       
       {/* AI Chat Assistant - Pro Only */}
       {isPro && (
