@@ -233,7 +233,7 @@ export default function PricingPage() {
               }`}
             >
               Yearly
-              <span className="ml-1.5 sm:ml-2 text-[10px] sm:text-xs text-accent">Save 20%</span>
+              <span className="ml-1.5 sm:ml-2 text-[10px] sm:text-xs text-accent">Save 17%</span>
             </button>
           </div>
         </div>
