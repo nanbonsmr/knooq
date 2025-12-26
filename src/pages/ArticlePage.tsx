@@ -519,7 +519,7 @@ export default function ArticlePage() {
           {htmlContent && (
             <div 
               ref={scrollContainerRef}
-              className={`overflow-y-auto scroll-smooth ${isStudyMode ? 'h-[calc(100vh-400px)]' : 'h-[70vh]'}`}
+              className={`overflow-y-auto scroll-smooth ${isStudyMode ? 'h-[calc(100vh-400px)] study-mode-content' : 'h-[70vh]'}`}
             >
               <div
                 ref={articleContentRef}
@@ -527,9 +527,10 @@ export default function ArticlePage() {
                 dangerouslySetInnerHTML={{ __html: highlightedContent() }}
               />
               {isStudyMode && (
-                <p className="text-xs text-muted-foreground text-center mt-4 py-2">
-                  💡 Tip: Select text and drag it to the Study Notes panel to create a note
-                </p>
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground text-center mt-4 py-3 px-4 rounded-lg bg-primary/5 border border-primary/10 mx-4">
+                  <span className="inline-block w-3 h-3 rounded bg-primary/50 animate-pulse" />
+                  <span>Select text and drag it to the Study Notes panel to create a note</span>
+                </div>
               )}
             </div>
           )}
