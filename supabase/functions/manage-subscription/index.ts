@@ -76,6 +76,24 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error("Dodo API error:", data);
+      
+      // Handle NOT_FOUND error - subscription may have been created in test mode or already deleted
+      if (data.code === "NOT_FOUND") {
+        console.log("Subscription not found in Dodo - may be from test mode or already cancelled");
+        // Return success for cancel action if subscription doesn't exist (already effectively cancelled)
+        if (action === "cancel") {
+          return new Response(JSON.stringify({ 
+            success: true, 
+            message: "Subscription cancelled",
+            note: "Subscription was not found in payment system - it may have already been cancelled or was created in test mode"
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        throw new Error("Subscription not found. It may have been created in test mode or already cancelled.");
+      }
+      
       throw new Error(data.message || data.error?.detail || "Failed to manage subscription");
     }
 

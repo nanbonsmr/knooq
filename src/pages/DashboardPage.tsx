@@ -146,6 +146,12 @@ export default function DashboardPage() {
 
       if (error) throw error;
 
+      // Update local subscription status in database
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'cancelled' })
+        .eq('id', subscription.id);
+
       toast({
         title: 'Subscription cancelled',
         description: 'Your subscription will remain active until the end of your billing period.',
