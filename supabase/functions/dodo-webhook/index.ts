@@ -19,12 +19,16 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Dodo webhook received:", JSON.stringify(body, null, 2));
 
-    const eventType = body.event_type;
+    // Dodo uses "type" not "event_type"
+    const eventType = body.type;
     const data = body.data;
+
+    console.log("Processing event type:", eventType);
 
     switch (eventType) {
       case "subscription.created":
-      case "subscription.active": {
+      case "subscription.active":
+      case "subscription.renewed": {
         const metadata = data.metadata || {};
         const userId = metadata.user_id;
 
@@ -36,21 +40,31 @@ serve(async (req) => {
           });
         }
 
-        const { error } = await supabase.from("subscriptions").upsert({
+        // Determine plan type from payment frequency
+        const planType = data.payment_frequency_interval === "Year" ? "yearly" : "monthly";
+
+        const subscriptionData = {
           user_id: userId,
-          paddle_subscription_id: data.subscription_id, // Reusing column for Dodo subscription ID
-          paddle_customer_id: data.customer?.customer_id, // Reusing column for Dodo customer ID
-          status: "active",
-          plan_type: data.billing_interval === "year" ? "yearly" : "monthly",
-          current_period_start: data.current_period_start,
-          current_period_end: data.current_period_end,
-        }, { onConflict: "paddle_subscription_id" });
+          paddle_subscription_id: data.subscription_id,
+          paddle_customer_id: data.customer?.customer_id,
+          status: "active" as const,
+          plan_type: planType,
+          current_period_start: data.previous_billing_date || data.created_at,
+          current_period_end: data.next_billing_date || data.expires_at,
+        };
+
+        console.log("Upserting subscription:", subscriptionData);
+
+        const { error } = await supabase.from("subscriptions").upsert(
+          subscriptionData,
+          { onConflict: "paddle_subscription_id" }
+        );
 
         if (error) {
           console.error("Error creating subscription:", error);
           throw error;
         }
-        console.log("Subscription created for user:", userId);
+        console.log("Subscription created/updated for user:", userId);
         break;
       }
 
@@ -64,8 +78,8 @@ serve(async (req) => {
           .from("subscriptions")
           .update({
             status,
-            current_period_start: data.current_period_start,
-            current_period_end: data.current_period_end,
+            current_period_start: data.previous_billing_date,
+            current_period_end: data.next_billing_date,
           })
           .eq("paddle_subscription_id", data.subscription_id);
 
@@ -93,14 +107,43 @@ serve(async (req) => {
       }
 
       case "payment.succeeded": {
-        // Handle one-time payments or subscription payments
+        // For subscription payments, also ensure subscription is active
+        if (data.subscription_id) {
+          const metadata = data.metadata || {};
+          const userId = metadata.user_id;
+
+          if (userId) {
+            // Check if subscription exists, if not create it
+            const { data: existingSub } = await supabase
+              .from("subscriptions")
+              .select("id")
+              .eq("paddle_subscription_id", data.subscription_id)
+              .maybeSingle();
+
+            if (!existingSub) {
+              console.log("Creating subscription from payment.succeeded event");
+              const { error } = await supabase.from("subscriptions").insert({
+                user_id: userId,
+                paddle_subscription_id: data.subscription_id,
+                paddle_customer_id: data.customer?.customer_id,
+                status: "active",
+                plan_type: "monthly", // Default, will be updated by subscription event
+              });
+
+              if (error) {
+                console.error("Error creating subscription from payment:", error);
+              } else {
+                console.log("Subscription created from payment for user:", userId);
+              }
+            }
+          }
+        }
         console.log("Payment succeeded:", data.payment_id);
         break;
       }
 
       case "payment.failed": {
         console.log("Payment failed:", data.payment_id);
-        // Could update subscription status to past_due if needed
         break;
       }
 
